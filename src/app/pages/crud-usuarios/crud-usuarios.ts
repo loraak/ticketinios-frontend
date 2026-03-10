@@ -11,6 +11,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { PasswordModule } from 'primeng/password';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AuthService, PERMISOS } from '../../services/auth.service';
 
@@ -19,7 +21,13 @@ export interface UsuarioCrud {
     nombreCompleto: string;
     email: string;
     password: string;
+    grupos: number[];
     activo: boolean;
+}
+
+export interface GrupoOpcion {
+    id: number;
+    nombre: string;
 }
 
 @Component({
@@ -29,7 +37,7 @@ export interface UsuarioCrud {
         CommonModule, FormsModule, ReactiveFormsModule,
         TableModule, CardModule, ButtonModule, DialogModule,
         InputTextModule, TagModule, ToastModule, ConfirmDialogModule,
-        FloatLabelModule, PasswordModule,
+        FloatLabelModule, PasswordModule, MultiSelectModule, DividerModule,
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './crud-usuarios.html',
@@ -39,55 +47,127 @@ export class Usuarios {
     protected authService = inject(AuthService);
     protected PERMISOS = PERMISOS;
 
-    usuarios: UsuarioCrud[] = [
-        { id: '1', nombreCompleto: 'César Admin',   email: 'admin@app.com',   password: '123', activo: true  },
-        { id: '2', nombreCompleto: 'César Usuario', email: 'usuario@app.com', password: '123', activo: true  },
-        { id: '3', nombreCompleto: 'Juan Prueba',   email: 'juan@app.com',    password: '123', activo: false },
+    grupos: GrupoOpcion[] = [
+        { id: 1, nombre: 'Joestar'     },
+        { id: 2, nombre: 'Stardust'    },
+        { id: 3, nombre: 'Diamond'     },
+        { id: 4, nombre: 'Passione'    },
+        { id: 5, nombre: 'Stone Ocean' },
+        { id: 6, nombre: 'Steel Ball'  },
+        { id: 7, nombre: 'Jojolion'    },
     ];
 
-    modalVisible = false;
+    usuarios: UsuarioCrud[] = [
+        { id: '1', nombreCompleto: 'César Admin',   email: 'admin@app.com',   password: '123', grupos: [1, 2], activo: true  },
+        { id: '2', nombreCompleto: 'César Usuario', email: 'usuario@app.com', password: '123', grupos: [1, 3], activo: true  },
+        { id: '3', nombreCompleto: 'Juan Prueba',   email: 'juan@app.com',    password: '123', grupos: [],     activo: false },
+    ];
+
+    // Retorna usuarios que pertenecen a un grupo
+    usuariosPorGrupo(grupoId: number): UsuarioCrud[] {
+        return this.usuarios.filter(u => u.grupos.includes(grupoId));
+    }
+
+    // Retorna usuarios sin grupo asignado
+    get usuariosSinGrupo(): UsuarioCrud[] {
+        return this.usuarios.filter(u => u.grupos.length === 0);
+    }
+
+    // Modal usuario
+    modalUsuarioVisible = false;
     modoEdicion = false;
     usuarioSeleccionado: UsuarioCrud | null = null;
-    form: FormGroup;
+    formUsuario: FormGroup;
+
+    // Modal grupo
+    modalGrupoVisible = false;
+    formGrupo: FormGroup;
 
     constructor(
         private fb: FormBuilder,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {
-        this.form = this.fb.group({
+        this.formUsuario = this.fb.group({
             nombreCompleto: ['', Validators.required],
             email:          ['', [Validators.required, Validators.email]],
             password:       ['', Validators.required],
+            grupos:         [[]],
+        });
+
+        this.formGrupo = this.fb.group({
+            nombre: ['', Validators.required],
         });
     }
 
+    // — Grupos —
+    abrirModalGrupo() {
+        this.formGrupo.reset();
+        this.modalGrupoVisible = true;
+    }
+
+    guardarGrupo() {
+        if (this.formGrupo.invalid) {
+            this.formGrupo.markAllAsTouched();
+            return;
+        }
+        const nuevoGrupo: GrupoOpcion = {
+            id: Date.now(),
+            nombre: this.formGrupo.value.nombre
+        };
+        this.grupos = [...this.grupos, nuevoGrupo];
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: `Grupo "${nuevoGrupo.nombre}" creado.` });
+        this.modalGrupoVisible = false;
+    }
+
+    confirmarEliminarGrupo(grupo: GrupoOpcion) {
+        this.confirmationService.confirm({
+            message: `¿Eliminar el grupo "${grupo.nombre}"? Los usuarios no serán eliminados.`,
+            header: 'Confirmar Eliminación',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptButtonProps: { severity: 'danger' },
+            rejectButtonProps: { severity: 'secondary', text: true },
+            accept: () => {
+                // Desasignar grupo de usuarios
+                this.usuarios = this.usuarios.map(u => ({
+                    ...u,
+                    grupos: u.grupos.filter(gid => gid !== grupo.id)
+                }));
+                this.grupos = this.grupos.filter(g => g.id !== grupo.id);
+                this.messageService.add({ severity: 'warn', summary: 'Eliminado', detail: `Grupo "${grupo.nombre}" eliminado.` });
+            }
+        });
+    }
+
+    // — Usuarios —
     abrirModalNuevo() {
         this.modoEdicion = false;
         this.usuarioSeleccionado = null;
-        this.form.reset();
-        this.form.get('password')!.setValidators(Validators.required);
-        this.form.get('password')!.updateValueAndValidity();
-        this.modalVisible = true;
+        this.formUsuario.reset({ grupos: [] });
+        this.formUsuario.get('password')!.setValidators(Validators.required);
+        this.formUsuario.get('password')!.updateValueAndValidity();
+        this.modalUsuarioVisible = true;
     }
 
     abrirModalEditar(usuario: UsuarioCrud) {
         this.modoEdicion = true;
         this.usuarioSeleccionado = usuario;
-        this.form.patchValue({ ...usuario, password: '' });
-        this.form.get('password')!.clearValidators();
-        this.form.get('password')!.updateValueAndValidity();
-        this.modalVisible = true;
+        this.formUsuario.patchValue({ ...usuario, password: '' });
+        this.formUsuario.get('password')!.clearValidators();
+        this.formUsuario.get('password')!.updateValueAndValidity();
+        this.modalUsuarioVisible = true;
     }
 
-    guardar() {
-        if (this.form.invalid) {
-            this.form.markAllAsTouched();
+    guardarUsuario() {
+        if (this.formUsuario.invalid) {
+            this.formUsuario.markAllAsTouched();
             return;
         }
 
         if (this.modoEdicion && this.usuarioSeleccionado) {
-            const valores = this.form.value;
+            const valores = this.formUsuario.value;
             const idx = this.usuarios.findIndex(u => u.id === this.usuarioSeleccionado!.id);
             this.usuarios[idx] = {
                 ...this.usuarioSeleccionado,
@@ -99,12 +179,12 @@ export class Usuarios {
         } else {
             this.usuarios = [...this.usuarios, {
                 id: crypto.randomUUID(),
-                ...this.form.value,
+                ...this.formUsuario.value,
                 activo: true
             }];
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado.' });
         }
-        this.modalVisible = false;
+        this.modalUsuarioVisible = false;
     }
 
     confirmarBaja(usuario: UsuarioCrud) {

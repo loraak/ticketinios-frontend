@@ -13,10 +13,10 @@
         </div>
     </ng-template>
 
-    <p-table [value]="gruposVisibles" [paginator]="true" [rows]="5">
+    <p-table [value]="gruposVisibles" [paginator]="true" [rows]="5" dataKey="id" [expandedRowKeys]="expandedRows">
         <ng-template pTemplate="header">
             <tr>
-                <th>Nivel</th>
+                <th style="width: 3rem"></th> <th>Nivel</th>
                 <th>Nombre</th>
                 <th>Autor</th>
                 <th>Integrantes</th>
@@ -26,41 +26,82 @@
             </tr>
         </ng-template>
 
-        <ng-template pTemplate="body" let-grupo>
+        <ng-template pTemplate="body" let-grupo let-expanded="expanded">
             <tr>
+                <td>
+                    <td>
+                        <p-button type="button" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" [text]="true" [rounded]="true" (onClick)="toggleRow(grupo)"></p-button>
+                    </td>
                 <td>{{ grupo.nivel }}</td>
                 <td>{{ grupo.nombre }}</td>
                 <td>{{ grupo.autor }}</td>
                 <td>{{ grupo.integrantes }}</td>
                 <td>{{ grupo.tickets }}</td>
                 <td>
-                    <p-tag
-                        [value]="grupo.activo ? 'Activo' : 'Baja'"
-                        [severity]="grupo.activo ? 'success' : 'danger'">
-                    </p-tag>
+                    <p-tag [value]="grupo.activo ? 'Activo' : 'Baja'" [severity]="grupo.activo ? 'success' : 'danger'"></p-tag>
                 </td>
                 <td>
                     <div class="flex gap-2">
                         @if (authService.tienePermiso(PERMISOS.GROUPS_VER_ESPECIFICO)) {
-                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true"
-                                severity="info" pTooltip="Ingresar al grupo"
-                                (onClick)="ingresarGrupo()">
-                            </p-button>
+                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo()"></p-button>
                         }
-
                         @if (authService.tienePermiso(PERMISOS.GROUPS_EDITAR)) {
-                            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                                pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)"
-                                [disabled]="!grupo.activo">
-                            </p-button>
+                            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)" [disabled]="!grupo.activo"></p-button>
+                        }
+                        @if (authService.tienePermiso(PERMISOS.GROUPS_BAJA)) {
+                            <p-button icon="pi pi-ban" [rounded]="true" [text]="true" severity="danger" pTooltip="Dar de baja" (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo"></p-button>
+                        }
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="rowexpansion" let-grupo>
+            <tr>
+                <td colspan="8">
+                    <div class="p-3 surface-ground border-round shadow-1 mx-3 my-2" *ngIf="resumenes[grupo.id] as resumen">
+                        
+                        <h4 class="m-0 mb-3 text-color">Resumen de Tickets</h4>
+                        <div class="flex gap-3 mb-4 overflow-x-auto">
+                            <div class="flex-1 min-w-10rem p-3 surface-card border-round border-1 surface-border flex justify-content-between align-items-center">
+                                <span class="text-color-secondary font-medium">Total</span>
+                                <span class="text-xl font-bold text-primary">{{ resumen.total }}</span>
+                            </div>
+                            <div class="flex-1 min-w-10rem p-3 surface-card border-round border-1 surface-border flex justify-content-between align-items-center">
+                                <span class="text-color-secondary font-medium">Pendientes</span>
+                                <span class="text-xl font-bold text-orange-500">{{ resumen.pendientes }}</span>
+                            </div>
+                            <div class="flex-1 min-w-10rem p-3 surface-card border-round border-1 surface-border flex justify-content-between align-items-center">
+                                <span class="text-color-secondary font-medium">En Progreso</span>
+                                <span class="text-xl font-bold text-blue-500">{{ resumen.enProgreso }}</span>
+                            </div>
+                            <div class="flex-1 min-w-10rem p-3 surface-card border-round border-1 surface-border flex justify-content-between align-items-center">
+                                <span class="text-color-secondary font-medium">Bloqueados</span>
+                                <span class="text-xl font-bold text-red-500">{{ resumen.bloqueados }}</span>
+                            </div>
+                            <div class="flex-1 min-w-10rem p-3 surface-card border-round border-1 surface-border flex justify-content-between align-items-center">
+                                <span class="text-color-secondary font-medium">Hechos</span>
+                                <span class="text-xl font-bold text-green-500">{{ resumen.hechos }}</span>
+                            </div>
+                        </div>
+
+                        <h4 class="m-0 mb-3 text-color">Tickets Recientes</h4>
+                        @if (resumen.recientes.length > 0) {
+                            <div class="flex flex-column gap-2">
+                                @for (ticket of resumen.recientes; track ticket.id) {
+                                    <div class="surface-card p-2 border-round border-1 surface-border flex justify-content-between align-items-center">
+                                        <div class="flex align-items-center gap-2">
+                                            <span class="font-medium text-color">#{{ ticket.id }} - {{ ticket.titulo }}</span>
+                                            <p-tag [value]="ticket.estado"></p-tag>
+                                        </div>
+                                        <span class="text-sm text-color-secondary"><i class="pi pi-user mr-1"></i> {{ ticket.asignado }}</span>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <p class="text-sm text-color-secondary font-italic m-0">No hay tickets recientes en este grupo.</p>
                         }
 
-                        @if (authService.tienePermiso(PERMISOS.GROUPS_BAJA)) {
-                            <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                                severity="danger" pTooltip="Dar de baja"
-                                (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo">
-                            </p-button>
-                        }
                     </div>
                 </td>
             </tr>
@@ -68,9 +109,7 @@
 
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="7" class="text-center p-4 text-color-secondary">
-                    No hay grupos registrados.
-                </td>
+                <td colspan="8" class="text-center p-4 text-color-secondary">No hay grupos registrados.</td>
             </tr>
         </ng-template>
     </p-table>

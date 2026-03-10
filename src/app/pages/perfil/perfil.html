@@ -1,16 +1,15 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div style="max-width: 600px;">
+<div class="w-full">
 
+    <!-- Card principal -->
     <p-card styleClass="mb-4">
         <div class="flex align-items-center justify-content-between">
             <div class="flex align-items-center gap-3">
-                <p-avatar icon="pi pi-user" size="xlarge" shape="circle" styleClass="bg-primary text-white"></p-avatar>
+                <p-avatar image="/mista.jpg" size="xlarge" shape="circle" styleClass="bg-primary text-white"></p-avatar>
                 <div>
-                    <h2 class="m-0 mb-1 text-2xl font-bold text-color">
-                        {{ usuario.nombreCompleto }}
-                    </h2>
+                    <h2 class="m-0 mb-1 text-2xl font-bold text-color">{{ usuario.nombreCompleto }}</h2>
                     <p class="m-0 mb-2 text-color-secondary">@{{ usuario.usuario }}</p>
                     <p-tag
                         [value]="usuario.activo ? 'Activo' : 'Baja'"
@@ -33,7 +32,8 @@
         </div>
     </p-card>
 
-    <p-card header="Información Personal">
+    <!-- Información personal -->
+    <p-card header="Información Personal" styleClass="mb-4">
         <div class="flex flex-column gap-3">
 
             <div class="flex align-items-center gap-3">
@@ -82,8 +82,104 @@
 
         </div>
     </p-card>
+
+    <!-- Resumen de carga de trabajo -->
+    <p-card header="Carga de Trabajo" styleClass="mb-4">
+        <div class="grid">
+            <div class="col-6 md:col-3 text-center">
+                <p class="text-3xl font-bold text-color m-0">{{ resumen.total }}</p>
+                <p class="text-xs text-color-secondary m-0 mt-1">Total</p>
+            </div>
+            <div class="col-6 md:col-3 text-center">
+                <p class="text-3xl font-bold m-0" style="color: #3b82f6;">{{ resumen.pendiente }}</p>
+                <p class="text-xs text-color-secondary m-0 mt-1">Pendiente</p>
+            </div>
+            <div class="col-6 md:col-3 text-center">
+                <p class="text-3xl font-bold m-0" style="color: #f59e0b;">{{ resumen.enProgreso }}</p>
+                <p class="text-xs text-color-secondary m-0 mt-1">En Progreso</p>
+            </div>
+            <div class="col-6 md:col-3 text-center">
+                <p class="text-3xl font-bold m-0" style="color: #ef4444;">{{ resumen.bloqueado }}</p>
+                <p class="text-xs text-color-secondary m-0 mt-1">Bloqueado</p>
+            </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Barra de progreso visual -->
+        <div style="height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden;">
+            <div style="height: 100%; display: flex;">
+                <div [style.width.%]="(resumen.hecho / resumen.total) * 100"
+                     style="background: #22c55e; transition: width 0.3s;">
+                </div>
+                <div [style.width.%]="(resumen.enProgreso / resumen.total) * 100"
+                     style="background: #f59e0b; transition: width 0.3s;">
+                </div>
+                <div [style.width.%]="(resumen.bloqueado / resumen.total) * 100"
+                     style="background: #ef4444; transition: width 0.3s;">
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-2">
+            <small class="flex align-items-center gap-1">
+                <span style="width:8px; height:8px; border-radius:50%; background:#22c55e; display:inline-block;"></span>
+                Hecho ({{ resumen.hecho }})
+            </small>
+            <small class="flex align-items-center gap-1">
+                <span style="width:8px; height:8px; border-radius:50%; background:#f59e0b; display:inline-block;"></span>
+                En progreso ({{ resumen.enProgreso }})
+            </small>
+            <small class="flex align-items-center gap-1">
+                <span style="width:8px; height:8px; border-radius:50%; background:#ef4444; display:inline-block;"></span>
+                Bloqueado ({{ resumen.bloqueado }})
+            </small>
+        </div>
+    </p-card>
+
+    <!-- Tickets asignados -->
+    <p-card header="Mis Tickets">
+        <p-table
+            [value]="ticketsAsignados"
+            [paginator]="true"
+            [rows]="5"
+            styleClass="p-datatable-sm p-datatable-gridlines">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Título</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Grupo</th>
+                    <th>Fecha Límite</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-ticket>
+                <tr>
+                    <td class="font-medium">#{{ ticket.id }} - {{ ticket.titulo }}</td>
+                    <td>
+                        <p-tag [value]="ticket.estado" [severity]="severidadEstado(ticket.estado)"></p-tag>
+                    </td>
+                    <td>
+                        <p-tag [value]="ticket.prioridad" [severity]="severidadPrioridad(ticket.prioridad)"></p-tag>
+                    </td>
+                    <td>{{ ticket.grupo }}</td>
+                    <td>{{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center p-4 text-color-secondary">
+                        No tenés tickets asignados.
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </p-card>
+
 </div>
 
+<!-- Modal Editar -->
 <p-dialog
     [(visible)]="modalVisible"
     header="Editar Perfil"

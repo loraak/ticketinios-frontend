@@ -2,63 +2,155 @@
 <p-confirmDialog></p-confirmDialog>
 
 <div class="p-4 surface-ground min-h-screen">
-    
     <div class="flex justify-content-between align-items-center mb-4">
-    <div class="flex align-items-center gap-3">
-        <h1 class="m-0 text-2xl font-bold text-color">Tickets</h1>
-        
-        <div class="flex gap-1">
-            <p-button [outlined]="vistaActual !== 'kanban'" icon="pi pi-th-large" (onClick)="vistaActual = 'kanban'"></p-button>
-            <p-button [outlined]="vistaActual !== 'tabla'" icon="pi pi-list" (onClick)="vistaActual = 'tabla'"></p-button>
+        <div class="flex align-items-center gap-3">
+            <h1 class="m-0 text-2xl font-bold text-color">Tickets</h1>
+            <div class="flex gap-1">
+                <p-button [outlined]="vistaActual !== 'kanban'" icon="pi pi-th-large" (onClick)="vistaActual = 'kanban'"></p-button>
+                <p-button [outlined]="vistaActual !== 'tabla'" icon="pi pi-list" (onClick)="vistaActual = 'tabla'"></p-button>
+            </div>
         </div>
-    </div>
         @if (authService.tienePermiso(PERMISOS.TICKETS_AGREGAR)) {
             <p-button label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
         }
     </div>
 
-    <div class="flex gap-4 overflow-x-auto pb-3">
-        @for (estado of estados; track estado) {
-            <div class="flex-1 min-w-15rem surface-section p-3 border-round border-1 surface-border" pDroppable="tickets" (onDrop)="drop(estado)" >
-                
-                <div class="flex justify-content-between align-items-center mb-3">
-                    <h3 class="m-0 text-lg font-semibold text-color">{{ estado }}</h3>
-                    <p-tag [value]="getTickets(estado).length.toString()" severity="info"></p-tag>
-                </div>
+    <!-- Filtros rápidos -->
+    <div class="flex gap-2 mb-4 flex-wrap">
+        <p-button
+            label="Todos"
+            [outlined]="filtroActivo !== 'todos'"
+            size="small"
+            icon="pi pi-list"
+            (onClick)="filtroActivo = 'todos'">
+        </p-button>
+        <p-button
+            label="Mis tickets"
+            [outlined]="filtroActivo !== 'mis-tickets'"
+            size="small"
+            icon="pi pi-user"
+            (onClick)="filtroActivo = 'mis-tickets'">
+        </p-button>
+        <p-button
+            label="Sin asignar"
+            [outlined]="filtroActivo !== 'sin-asignar'"
+            size="small"
+            icon="pi pi-user-minus"
+            severity="secondary"
+            (onClick)="filtroActivo = 'sin-asignar'">
+        </p-button>
+        <p-button
+            label="Prioridad alta"
+            [outlined]="filtroActivo !== 'alta-prioridad'"
+            size="small"
+            icon="pi pi-exclamation-triangle"
+            severity="danger"
+            (onClick)="filtroActivo = 'alta-prioridad'">
+        </p-button>
+    </div>
 
-                <div class="flex flex-column gap-3">
-                    @for (ticket of getTickets(estado); track ticket.id) {
-                        
-                        <div class="surface-card p-3 border-round shadow-1 border-1 surface-border"
-                            [class.cursor-pointer]="authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
-                            pDraggable="tickets" 
-                            [pDraggableDisabled]="!authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
-                            (onDragStart)="dragStart(ticket)" 
-                            (onDragEnd)="dragEnd()" 
-                            (click)="authService.tienePermiso(PERMISOS.TICKETS_DETALLE) ? editarTicket(ticket) : null">
-                                                    
-                            <div class="flex justify-content-between align-items-start mb-2">
-                                <div class="font-medium text-color">{{ ticket.titulo }}</div>
+    @if (vistaActual === 'kanban') { 
+        <div class="flex gap-4 overflow-x-auto pb-3">
+            @for (estado of estados; track estado) {
+                <div class="flex-1 min-w-15rem surface-section p-3 border-round border-1 surface-border" pDroppable="tickets" (onDrop)="drop(estado)" >
+                    
+                    <div class="flex justify-content-between align-items-center mb-3">
+                        <h3 class="m-0 text-lg font-semibold text-color">{{ estado }}</h3>
+                        <p-tag [value]="getTickets(estado).length.toString()" severity="info"></p-tag>
+                    </div>
+
+                    <div class="flex flex-column gap-3">
+                        @for (ticket of getTickets(estado); track ticket.id) {
+                            <div class="surface-card p-3 border-round shadow-1 border-1 surface-border"
+                                [class.cursor-pointer]="authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
+                                pDraggable="tickets" 
+                                [pDraggableDisabled]="!authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
+                                (onDragStart)="dragStart(ticket)" 
+                                (onDragEnd)="dragEnd()" 
+                                (click)="authService.tienePermiso(PERMISOS.TICKETS_DETALLE) ? editarTicket(ticket) : null">
+                                                        
+                                <div class="flex justify-content-between align-items-start mb-2">
+                                    <div class="font-medium text-color">{{ ticket.titulo }}</div>
+                                    <div class="flex gap-1">
+                                        @if (authService.tienePermiso(PERMISOS.TICKETS_ELIMINAR)) {
+                                            <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
+                                        }
+                                    </div>
+                                </div>
                                 
-                                <div class="flex gap-1">
-                                    @if (authService.tienePermiso(PERMISOS.TICKETS_ELIMINAR)) {
-                                        <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
-                                    }
+                                <div class="mb-2 flex justify-content-between align-items-center">
+                                    <p-tag [value]="ticket.prioridad" [severity]="getSeverity(ticket.prioridad)"></p-tag>
+                                </div>
+                                
+                                <div class="text-sm text-color-secondary flex flex-column gap-1">
+                                    <span><i class="pi pi-user text-xs"></i> {{ ticket.asignado }}</span>
+                                    <span><i class="pi pi-folder text-xs"></i> Grupo: {{ ticket.grupo }}</span>
                                 </div>
                             </div>
-                            
-                            <div class="text-sm text-color-secondary flex flex-column gap-1">
-                                <span><i class="pi pi-user text-xs"></i> {{ ticket.asignado }}</span>
-                                <span><i class="pi pi-folder text-xs"></i> Grupo: {{ ticket.grupo }}</span>
-                            </div>
-                        </div>
-                    } @empty {
-                        <p class="text-sm text-color-secondary text-center font-italic m-0 py-2">Sin tickets</p>
-                    }
+                        } @empty {
+                            <p class="text-sm text-color-secondary text-center font-italic m-0 py-2">Sin tickets</p>
+                        }
+                    </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    } @else { 
+        <div class="surface-card p-3 border-round shadow-1 border-1 surface-border">
+            <p-table #dt [value]="ticketsVisibles" [paginator]="true" [rows]="10" 
+                    [globalFilterFields]="['titulo', 'asignado', 'estado', 'prioridad', 'grupo']"
+                    styleClass="p-datatable-sm" responsiveLayout="scroll">
+                
+                <ng-template pTemplate="caption">
+                    <div class="flex justify-content-end">
+                        <span class="p-input-icon-left">
+                            <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Buscar ticket..." />
+                        </span>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="id">ID / Título <p-sortIcon field="id"></p-sortIcon></th>
+                        <th pSortableColumn="estado">Estado <p-sortIcon field="estado"></p-sortIcon></th>
+                        <th pSortableColumn="creador">Creador <p-sortIcon field="creador"></p-sortIcon></th>
+                        <th pSortableColumn="asignado">Asignado a <p-sortIcon field="asignado"></p-sortIcon></th>
+                        <th pSortableColumn="prioridad">Prioridad <p-sortIcon field="prioridad"></p-sortIcon></th>
+                        <th pSortableColumn="grupo">Grupo <p-sortIcon field="grupo"></p-sortIcon></th>
+                        <th pSortableColumn="fechaLimite">Fecha Límite <p-sortIcon field="fechaLimite"></p-sortIcon></th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-ticket>
+                    <tr>
+                        <td class="font-medium text-primary" 
+                            [class.cursor-pointer]="authService.tienePermiso(PERMISOS.TICKETS_DETALLE)" 
+                            (click)="authService.tienePermiso(PERMISOS.TICKETS_DETALLE) ? editarTicket(ticket) : null">
+                            #{{ ticket.id }} - {{ ticket.titulo }}
+                        </td>
+                        <td><p-tag [value]="ticket.estado" severity="info"></p-tag></td>
+                        <td>{{ ticket.creador }}</td>
+                        <td>{{ ticket.asignado }}</td>
+                        <td><p-tag [value]="ticket.prioridad" [severity]="getSeverity(ticket.prioridad)"></p-tag></td>
+                        <td>{{ ticket.grupo }}</td>
+                        <td>{{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</td>
+                        <td class="text-center">
+                            @if (authService.tienePermiso(PERMISOS.TICKETS_DETALLE)) {
+                                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" (onClick)="editarTicket(ticket)"></p-button>
+                            }
+                            @if (authService.tienePermiso(PERMISOS.TICKETS_ELIMINAR)) {
+                                <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (onClick)="eliminarTicket(ticket)"></p-button>
+                            }
+                        </td>
+                    </tr>
+                </ng-template>
+                
+                <ng-template pTemplate="emptymessage">
+                    <tr><td colspan="8" class="text-center p-4 text-color-secondary">No se encontraron tickets.</td></tr>
+                </ng-template>
+            </p-table>
+        </div>
+    }
 </div>
 
 <p-dialog [(visible)]="modalVisible" [header]="modoEdicion ? 'Detalle de Ticket' : 'Nuevo Ticket'" [modal]="true" [style]="{ width: '800px' }" [draggable]="false">
@@ -90,7 +182,10 @@
                 <div class="grid">
                     <div class="col-6">
                         <label class="block mb-1 text-sm text-color-secondary font-medium">Asignado a</label>
-                        <input type="text" pInputText formControlName="asignado" class="w-full">
+                        <select formControlName="asignado" class="w-full p-inputtext" style="appearance: auto;">
+                            <option value="" disabled>Seleccione un usuario...</option>
+                            @for (usr of usuarios; track usr) { <option [value]="usr">{{ usr }}</option> }
+                        </select>
                     </div>
                     <div class="col-6">
                         <label class="block mb-1 text-sm text-color-secondary font-medium">Fecha Límite</label>

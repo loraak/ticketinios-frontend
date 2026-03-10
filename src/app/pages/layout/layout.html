@@ -3,7 +3,7 @@
     <div class="surface-section flex flex-column py-4 px-3 border-right-1 surface-border" style="width: 260px;">
 
         <div class="text-center mb-4">
-            <p-avatar image="/assets/mista.jpg" size="xlarge" shape="circle"></p-avatar>
+            <p-avatar image="/mista.jpg" size="xlarge" shape="circle"></p-avatar>
             <p class="m-0 mt-2 text-sm text-color-secondary">
                 {{ authService.usuario()?.email }}
             </p>
@@ -35,6 +35,12 @@
             <a routerLink="/app/tickets" routerLinkActive="font-bold text-primary"
                 class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                 <i class="pi pi-ticket"></i> Tickets
+            </a>
+            }
+            @if (authService.tienePermiso(PERMISOS.SUPERADMIN_VER)) {
+            <a routerLink="/app/superadmin" routerLinkActive="font-bold text-primary"
+                class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
+                <i class="pi pi-ticket"></i> Permisos
             </a>
             }
         </nav>

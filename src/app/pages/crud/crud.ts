@@ -61,6 +61,45 @@ export class Groups {
     { id: 10, nivel: 2, autor: 'Kira', nombre: 'Morioh', integrantes: 1, tickets: 2, descripcion: 'Tranquilidad', activo: true }
   ];
 
+  ticketsMock = [
+    { id: 101, titulo: 'Falla en login', estado: 'Pendiente', grupo: 'Joestar', asignado: 'César Usuario' },
+    { id: 102, titulo: 'Actualizar BD', estado: 'En Progreso', grupo: 'Joestar', asignado: 'Jonathan' },
+    { id: 103, titulo: 'Crear vistas', estado: 'Hecho', grupo: 'Stardust', asignado: 'César Usuario' },
+    { id: 104, titulo: 'Error 500', estado: 'Bloqueado', grupo: 'Joestar', asignado: 'Admin' },
+  ];
+
+  getResumenGrupo(nombreGrupo: string) {
+    const tickets = this.ticketsMock.filter(t => t.grupo === nombreGrupo);
+    
+    return {
+      total: tickets.length,
+      pendientes: tickets.filter(t => t.estado === 'Pendiente').length,
+      enProgreso: tickets.filter(t => t.estado === 'En Progreso').length,
+      bloqueados: tickets.filter(t => t.estado === 'Bloqueado').length,
+      hechos: tickets.filter(t => t.estado === 'Hecho').length,
+      recientes: tickets.slice(-3).reverse() 
+    };
+  }
+
+  // Variables para controlar la expansión y guardar los resúmenes calculados
+  expandedRows: { [key: string]: boolean } = {};
+  resumenes: { [key: number]: any } = {};
+
+  toggleRow(grupo: Group) {
+    // Si ya está abierto, lo cerramos y borramos el resumen
+    if (this.expandedRows[grupo.id]) {
+      delete this.expandedRows[grupo.id];
+      delete this.resumenes[grupo.id];
+    } 
+    // Si está cerrado, lo abrimos y calculamos el resumen UNA sola vez
+    else {
+      this.expandedRows[grupo.id] = true;
+      this.resumenes[grupo.id] = this.getResumenGrupo(grupo.nombre);
+    }
+    // Clonamos el objeto para forzar la actualización visual de PrimeNG
+    this.expandedRows = { ...this.expandedRows };
+  }
+
   get gruposVisibles() {
     // Si es admin, retorna todos
     if (this.authService.tienePermiso(this.PERMISOS.GROUPS_ADMIN)) {

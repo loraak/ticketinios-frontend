@@ -27,7 +27,12 @@ export const PERMISOS = {
     TICKETS_ADMIN:   'tickets:admin',
     TICKETS_EDITAR: 'tickets:editar', 
     TICKETS_ELIMINAR: 'tickets:eliminar',
-    TICKETS_DETALLE: 'tickets:detalle' 
+    TICKETS_DETALLE: 'tickets:detalle', 
+    //  SUPERADMIN
+    SUPERADMIN_VER: 'superadmin:ver', 
+    SUPERADMIN_EDITAR: 'superadmin:editar', 
+    SUPERADMIN_BAJA: 'superadmin:baja', 
+    SUPERADMIN_CREAR: 'superadmin:crear'
 } as const;
 
 export type Permiso = typeof PERMISOS[keyof typeof PERMISOS];
@@ -71,7 +76,7 @@ const USUARIOS_MOCK: Usuario[] = [
             PERMISOS.TICKETS_AGREGAR,
             PERMISOS.TICKETS_EDITAR,
             PERMISOS.TICKETS_ELIMINAR, 
-            PERMISOS.TICKETS_DETALLE 
+            PERMISOS.TICKETS_DETALLE
         ],
     },
     {
@@ -97,6 +102,44 @@ const USUARIOS_MOCK: Usuario[] = [
             PERMISOS.TICKETS_EDITAR,
             PERMISOS.TICKETS_ELIMINAR, 
             PERMISOS.TICKETS_DETALLE 
+        ],
+    },
+        {
+        id: '3',
+        nombreCompleto: 'César SuperAdmin',
+        email: 'superadmin@app.com',
+        password: '123',
+        permisos: [
+            PERMISOS.PERFIL_EDITAR,
+            PERMISOS.PERFIL_BAJA,
+            //  CRUD de grupos. 
+            PERMISOS.GROUPS_ADMIN, 
+            PERMISOS.GROUPS_VER,
+            PERMISOS.GROUPS_CREAR, 
+            PERMISOS.GROUPS_EDITAR, 
+            PERMISOS.GROUPS_BAJA, 
+            //  GRUPOS DETALLES. 
+            PERMISOS.GROUPS_VER_ESPECIFICO,
+            PERMISOS.GROUPS_DETALLE_CREAR,
+            PERMISOS.GROUPS_DETALLE_EDITAR, 
+            PERMISOS.GROUPS_DETALLE_BAJA, 
+            //  CRUD DE USUARIOS
+            PERMISOS.USUARIOS_VER,
+            PERMISOS.USUARIOS_CREAR,
+            PERMISOS.USUARIOS_EDITAR,
+            PERMISOS.USUARIOS_BAJA,
+            //  CRUD DE TICKETS. 
+            PERMISOS.TICKETS_ADMIN,
+            PERMISOS.TICKETS_VER,
+            PERMISOS.TICKETS_AGREGAR,
+            PERMISOS.TICKETS_EDITAR,
+            PERMISOS.TICKETS_ELIMINAR, 
+            PERMISOS.TICKETS_DETALLE, 
+            //  SUPERADMIN
+            PERMISOS.SUPERADMIN_VER,
+            PERMISOS.SUPERADMIN_EDITAR,
+            PERMISOS.SUPERADMIN_BAJA,
+            PERMISOS.SUPERADMIN_CREAR
         ],
     },
 ];
