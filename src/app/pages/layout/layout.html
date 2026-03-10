@@ -19,7 +19,7 @@
                 class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                 <i class="pi pi-user"></i> Perfil
             </a>
-            @if (authService.tienePermiso(PERMISOS.USUARIOS_ADMIN)) {
+            @if (authService.tienePermiso(PERMISOS.USUARIOS_VER)) {
                 <a routerLink="/app/usuarios" routerLinkActive="font-bold text-primary"
                     class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                     <i class="pi pi-users"></i> Usuarios
@@ -31,10 +31,12 @@
                 <i class="pi pi-table"></i> Grupos
             </a>
             }
+            @if (authService.tienePermiso(PERMISOS.TICKETS_VER)) {
             <a routerLink="/app/tickets" routerLinkActive="font-bold text-primary"
                 class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                 <i class="pi pi-ticket"></i> Tickets
             </a>
+            }
         </nav>
 
         <div class="mt-auto">

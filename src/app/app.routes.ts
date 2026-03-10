@@ -16,8 +16,8 @@ export const routes: Routes = [
             { path: 'home',   loadComponent: () => import('./pages/home/home').then(m => m.Home) },
             { path: 'perfil', loadComponent: () => import('./pages/perfil/perfil').then(m => m.Perfil) },
             { path: 'crud',   canActivate: [permisoGuard(PERMISOS.GROUPS_VER)],   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
-            { path: 'usuarios',   canActivate: [permisoGuard(PERMISOS.USUARIOS_ADMIN)],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
-            { path: 'tickets', loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
+            { path: 'usuarios',   canActivate: [permisoGuard(PERMISOS.USUARIOS_VER)],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
+            { path: 'tickets', canActivate: [permisoGuard(PERMISOS.TICKETS_VER)],  loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
             { path: 'groupDetails',   canActivate: [permisoGuard(PERMISOS.GROUPS_VER_ESPECIFICO)],   loadComponent: () => import('./pages/group-detail/group-detail').then(m => m.GroupDetail) },
         ]
     },

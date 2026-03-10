@@ -4,24 +4,30 @@ export const PERMISOS = {
     //  Perfil - Aún no sé cómo manejarlos. 
     PERFIL_EDITAR:  'perfil:editar',
     PERFIL_BAJA:    'perfil:baja',
-    // CRUD de Grupos. 
+    //  CRUD de Grupos. 
     GROUPS_ADMIN: 'groups:admin', 
     GROUPS_VER:     'groups:ver',
     GROUPS_CREAR:   'groups:crear',
     GROUPS_EDITAR:  'groups:editar',
     GROUPS_BAJA:    'groups:baja',
-    // GRUPO DETALLES. 
+    //  GRUPO DETALLES. 
     GROUPS_VER_ESPECIFICO: 'groups:verespecifico',
     GROUPS_DETALLE_CREAR: 'groups:detail:crear',
     GROUPS_DETALLE_EDITAR: 'groups:detail:editar', 
     GROUPS_DETALLE_BAJA: 'groups:detail:baja', 
-    //Usuarios
-    USUARIOS_ADMIN: 'usuarios:admin',
+    GROUPS_MIS_TICKETS: 'groups:mistickets', 
+    //  Usuarios
     USUARIOS_VER:    'usuarios:ver',      
     USUARIOS_CREAR:  'usuarios:crear',    
     USUARIOS_EDITAR: 'usuarios:editar',   
     USUARIOS_BAJA:   'usuarios:baja',  
+    //  TICKETS
+    TICKETS_VER: 'tickets:ver', 
+    TICKETS_AGREGAR: 'tickets:agregar', 
     TICKETS_ADMIN:   'tickets:admin',
+    TICKETS_EDITAR: 'tickets:editar', 
+    TICKETS_ELIMINAR: 'tickets:eliminar',
+    TICKETS_DETALLE: 'tickets:detalle' 
 } as const;
 
 export type Permiso = typeof PERMISOS[keyof typeof PERMISOS];
@@ -43,24 +49,29 @@ const USUARIOS_MOCK: Usuario[] = [
         permisos: [
             PERMISOS.PERFIL_EDITAR,
             PERMISOS.PERFIL_BAJA,
-            //CRUD de grupos. 
+            //  CRUD de grupos. 
             PERMISOS.GROUPS_ADMIN, 
             PERMISOS.GROUPS_VER,
             PERMISOS.GROUPS_CREAR, 
             PERMISOS.GROUPS_EDITAR, 
             PERMISOS.GROUPS_BAJA, 
-            //GRUPOS DETALLES. 
+            //  GRUPOS DETALLES. 
             PERMISOS.GROUPS_VER_ESPECIFICO,
             PERMISOS.GROUPS_DETALLE_CREAR,
             PERMISOS.GROUPS_DETALLE_EDITAR, 
             PERMISOS.GROUPS_DETALLE_BAJA, 
-            //Nosé
-            PERMISOS.USUARIOS_ADMIN,
-            PERMISOS.TICKETS_ADMIN,
+            //  CRUD DE USUARIOS
             PERMISOS.USUARIOS_VER,
             PERMISOS.USUARIOS_CREAR,
             PERMISOS.USUARIOS_EDITAR,
             PERMISOS.USUARIOS_BAJA,
+            //  CRUD DE TICKETS. 
+            PERMISOS.TICKETS_ADMIN,
+            PERMISOS.TICKETS_VER,
+            PERMISOS.TICKETS_AGREGAR,
+            PERMISOS.TICKETS_EDITAR,
+            PERMISOS.TICKETS_ELIMINAR, 
+            PERMISOS.TICKETS_DETALLE 
         ],
     },
     {
@@ -69,16 +80,23 @@ const USUARIOS_MOCK: Usuario[] = [
         email: 'usuario@app.com',
         password: '123',
         permisos: [
-            //Perfil
+            //  Perfil
             PERMISOS.PERFIL_EDITAR,
-            //GRUPOS.
+            //  GRUPOS.
             PERMISOS.GROUPS_VER,
             PERMISOS.GROUPS_VER_ESPECIFICO,
             PERMISOS.GROUPS_CREAR,
-            //GRUPOS DETALLES. 
+            //  GRUPOS DETALLES. 
             PERMISOS.GROUPS_DETALLE_CREAR,
             PERMISOS.GROUPS_DETALLE_EDITAR, 
             PERMISOS.GROUPS_DETALLE_BAJA, 
+            PERMISOS.GROUPS_MIS_TICKETS, 
+            //  TICKETS. 
+            PERMISOS.TICKETS_VER,
+            PERMISOS.TICKETS_AGREGAR,
+            PERMISOS.TICKETS_EDITAR,
+            PERMISOS.TICKETS_ELIMINAR, 
+            PERMISOS.TICKETS_DETALLE 
         ],
     },
 ];

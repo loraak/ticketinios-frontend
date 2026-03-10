@@ -5,23 +5,25 @@
     
     
     <div class="mb-5">
-        <h2 class="text-xl font-bold text-color mb-3">Mis Tickets</h2>
-        <div class="flex gap-3 overflow-x-auto pb-2">
-            @for (ticket of misTickets; track ticket.id) {
-                <div class="surface-card p-3 border-round shadow-1 border-1 surface-border min-w-20rem flex justify-content-between align-items-center">
-                    <div>
-                        <div class="font-medium text-color">{{ ticket.titulo }}</div>
-                        <p-tag [value]="ticket.estado" severity="info" class="mt-2"></p-tag>
-                        <div class="text-sm text-color-secondary mt-2">
-                            <i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}
+        @if (authService.tienePermiso(PERMISOS.GROUPS_MIS_TICKETS)) {
+            <h2 class="text-xl font-bold text-color mb-3">Mis Tickets</h2>
+            <div class="flex gap-3 overflow-x-auto pb-2">
+                @for (ticket of misTickets; track ticket.id) {
+                    <div class="surface-card p-3 border-round shadow-1 border-1 surface-border min-w-20rem flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-medium text-color">{{ ticket.titulo }}</div>
+                            <p-tag [value]="ticket.estado" severity="info" class="mt-2"></p-tag>
+                            <div class="text-sm text-color-secondary mt-2">
+                                <i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}
+                            </div>
                         </div>
+                        
                     </div>
-                    
-                </div>
-            } @empty {
-                <p class="text-sm text-color-secondary font-italic m-0">No tienes tickets asignados.</p>
-            }
-        </div>
+                } @empty {
+                    <p class="text-sm text-color-secondary font-italic m-0">No tienes tickets asignados.</p>
+                }
+            </div>
+        }
     </div>
 
     <div class="flex justify-content-between align-items-center mb-4">
