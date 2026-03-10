@@ -1,0 +1,133 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-card>
+    <ng-template pTemplate="header">
+        <div class="flex justify-content-between align-items-center px-4 pt-3">
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e293b;">
+                Gestión de Usuarios
+            </h2>
+            <p-button label="Nuevo Usuario" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
+        </div>
+    </ng-template>
+
+    <p-table [value]="usuarios" [paginator]="true" [rows]="5" styleClass="p-datatable-gridlines">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th style="width: 10rem;">Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-usuario>
+            <tr>
+                <td>{{ usuario.nombreCompleto }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                    <p-tag
+                        [value]="usuario.rol === 'admin' ? 'Admin' : 'Usuario'"
+                        [severity]="usuario.rol === 'admin' ? 'warn' : 'info'">
+                    </p-tag>
+                </td>
+                <td>
+                    <p-tag
+                        [value]="usuario.activo ? 'Activo' : 'Baja'"
+                        [severity]="usuario.activo ? 'success' : 'danger'">
+                    </p-tag>
+                </td>
+                <td>
+                    <div class="flex gap-2">
+                        <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+                            pTooltip="Editar usuario"
+                            (onClick)="abrirModalEditar(usuario)"
+                            [disabled]="!usuario.activo">
+                        </p-button>
+                        <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
+                            severity="danger"
+                            pTooltip="Dar de baja"
+                            (onClick)="confirmarBaja(usuario)"
+                            [disabled]="!usuario.activo">
+                        </p-button>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5" class="text-center p-4 text-color-secondary">
+                    No hay usuarios registrados.
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<p-dialog
+    [(visible)]="modalVisible"
+    [header]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'"
+    [modal]="true"
+    [style]="{ width: '480px' }"
+    [contentStyle]="{ padding: '1.5rem' }"
+    [draggable]="false">
+
+    <form [formGroup]="form">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
+
+            <p-floatlabel>
+                <input id="nombreCompleto" type="text" pInputText formControlName="nombreCompleto" class="w-full">
+                <label for="nombreCompleto">Nombre Completo</label>
+            </p-floatlabel>
+            @if (form.get('nombreCompleto')!.touched && form.get('nombreCompleto')!.errors?.['required']) {
+                <small class="p-error block" style="margin-top: -1rem;">El nombre es requerido.</small>
+            }
+
+            <p-floatlabel>
+                <input id="email" type="email" pInputText formControlName="email" class="w-full">
+                <label for="email">Email</label>
+            </p-floatlabel>
+            @if (form.get('email')!.touched && form.get('email')!.errors) {
+                @if (form.get('email')!.errors!['required']) {
+                    <small class="p-error block" style="margin-top: -1rem;">El email es requerido.</small>
+                }
+                @if (form.get('email')!.errors!['email']) {
+                    <small class="p-error block" style="margin-top: -1rem;">Formato de email inválido.</small>
+                }
+            }
+
+            <p-floatlabel>
+                <p-password inputId="password" formControlName="password"
+                    [toggleMask]="true" [feedback]="false"
+                    styleClass="w-full" inputStyleClass="w-full">
+                </p-password>
+                <label for="password">
+                    {{ modoEdicion ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña' }}
+                </label>
+            </p-floatlabel>
+            @if (form.get('password')!.touched && form.get('password')!.errors?.['required']) {
+                <small class="p-error block" style="margin-top: -1rem;">La contraseña es requerida.</small>
+            }
+
+            <p-floatlabel>
+                <p-select inputId="rol" formControlName="rol"
+                    [options]="roles" optionLabel="label" optionValue="value"
+                    styleClass="w-full">
+                </p-select>
+                <label for="rol">Rol</label>
+            </p-floatlabel>
+
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" severity="secondary" [text]="true"
+            (onClick)="modalVisible = false">
+        </p-button>
+        <p-button [label]="modoEdicion ? 'Guardar' : 'Crear'"
+            (onClick)="guardar()">
+        </p-button>
+    </ng-template>
+</p-dialog>

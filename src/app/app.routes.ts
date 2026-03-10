@@ -16,6 +16,7 @@ export const routes: Routes = [
             { path: 'home',   loadComponent: () => import('./pages/home/home').then(m => m.Home) },
             { path: 'perfil', loadComponent: () => import('./pages/perfil/perfil').then(m => m.Perfil) },
             { path: 'crud',   canActivate: [permisoGuard(PERMISOS.CRUD_VER)],   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
+            { path: 'usuarios',   canActivate: [permisoGuard(PERMISOS.USUARIOS_ADMIN)],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
         ]
     },
     { path: '**', redirectTo: 'landing' } 

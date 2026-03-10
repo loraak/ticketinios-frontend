@@ -14,6 +14,8 @@ export const PERMISOS = {
     CRUD_CREAR:     'crud:crear',
     CRUD_EDITAR:    'crud:editar',
     CRUD_ELIMINAR:  'crud:eliminar',
+    // USUARIOS
+    USUARIOS_ADMIN: 'usuarios:admin'
 } as const;
 
 export type Permiso = typeof PERMISOS[keyof typeof PERMISOS];
