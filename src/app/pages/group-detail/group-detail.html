@@ -1,0 +1,139 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="p-4 surface-ground min-h-screen">
+    
+    
+    <div class="mb-5">
+        <h2 class="text-xl font-bold text-color mb-3">Mis Tickets</h2>
+        <div class="flex gap-3 overflow-x-auto pb-2">
+            @for (ticket of misTickets; track ticket.id) {
+                <div class="surface-card p-3 border-round shadow-1 border-1 surface-border min-w-20rem flex justify-content-between align-items-center">
+                    <div>
+                        <div class="font-medium text-color">{{ ticket.titulo }}</div>
+                        <p-tag [value]="ticket.estado" severity="info" class="mt-2"></p-tag>
+                        <div class="text-sm text-color-secondary mt-2">
+                            <i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}
+                        </div>
+                    </div>
+                    
+                </div>
+            } @empty {
+                <p class="text-sm text-color-secondary font-italic m-0">No tienes tickets asignados.</p>
+            }
+        </div>
+    </div>
+
+    <div class="flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="m-0 text-2xl font-bold text-color">Detalle del Grupo</h1>
+            <p class="m-0 mt-1 text-color-secondary">Total de tickets: {{ tickets.length }}</p>
+        </div>
+        @if (authService.tienePermiso(PERMISOS.GROUPS_DETALLE_CREAR)) {
+            <p-button label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
+        }
+    </div>
+
+    <div class="flex gap-4 overflow-x-auto pb-3">
+        @for (estado of estados; track estado) {
+            
+            <div class="flex-1 min-w-15rem surface-section p-3 border-round border-1 surface-border"pDroppable="tickets" (onDrop)="drop(estado)">
+                
+                <div class="flex justify-content-between align-items-center mb-3">
+                    <h3 class="m-0 text-lg font-semibold text-color">{{ estado }}</h3>
+                    <p-tag [value]="getTickets(estado).length.toString()" severity="info"></p-tag>
+                </div>
+
+                <div class="flex flex-column gap-3">
+                    @for (ticket of getTickets(estado); track ticket.id) {
+                        <div class="surface-card p-3 border-round shadow-1 border-1 surface-border transition-colors transition-duration-150 cursor-pointer"
+                            pDraggable="tickets" 
+                            (onDragStart)="dragStart(ticket)" 
+                            (onDragEnd)="dragEnd()"
+                            (click)="editarTicket(ticket)">
+                                                    
+                            <div class="flex justify-content-between align-items-start mb-2">
+                                <div class="font-medium text-color">{{ ticket.titulo }}</div>
+                                <div class="flex gap-1">
+                                    @if (authService.tienePermiso(PERMISOS.GROUPS_DETALLE_EDITAR)) {
+                                        <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" (onClick)="editarTicket(ticket)"></p-button>
+                                    }
+                                    @if (authService.tienePermiso(PERMISOS.GROUPS_DETALLE_BAJA)) {
+                                        <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <p-tag [value]="ticket.prioridad" [severity]="getSeverity(ticket.prioridad)"></p-tag>
+                            </div>
+                            
+                            <div class="text-sm text-color-secondary flex flex-column gap-1">
+                                <span class="flex align-items-center gap-2"><i class="pi pi-user text-xs"></i> {{ ticket.asignado }}</span>
+                                <span class="flex align-items-center gap-2"><i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                        </div>
+
+                    } @empty {
+
+                        <p class="text-sm text-color-secondary text-center font-italic m-0 py-2">Sin tickets</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<p-dialog [(visible)]="modalVisible" [header]="modoEdicion ? 'Editar Ticket' : 'Nuevo Ticket'" [modal]="true" [style]="{ width: '400px' }" [draggable]="false">
+    <form [formGroup]="form" class="flex flex-column pt-4 pb-2" style="gap: 1.5rem;">
+        
+        <div>
+            <label for="titulo" class="block mb-2 text-color-secondary font-medium">Título</label>
+            <input id="titulo" type="text" pInputText formControlName="titulo" class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': form.get('titulo')?.invalid && form.get('titulo')?.touched}">
+            @if (form.get('titulo')?.touched && form.get('titulo')?.errors?.['required']) {
+                <small class="p-error block mt-1">El título es requerido.</small>
+            }
+        </div>
+
+        <div>
+            <label for="asignado" class="block mb-2 text-color-secondary font-medium">Asignado a</label>
+            <input id="asignado" type="text" pInputText formControlName="asignado" class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': form.get('asignado')?.invalid && form.get('asignado')?.touched}">
+            @if (form.get('asignado')?.touched && form.get('asignado')?.errors?.['required']) {
+                <small class="p-error block mt-1">El encargado es requerido.</small>
+            }
+        </div>
+
+        <div>
+            <label for="estado" class="block mb-2 text-color-secondary font-medium">Estado</label>
+            <select id="estado" formControlName="estado" class="w-full p-inputtext" style="appearance: auto;">
+                @for (est of estados; track est) {
+                    <option [value]="est">{{ est }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="prioridad" class="block mb-2 text-color-secondary font-medium">Prioridad</label>
+            <select id="prioridad" formControlName="prioridad" class="w-full p-inputtext" style="appearance: auto;">
+                @for (prio of prioridades; track prio) {
+                    <option [value]="prio">{{ prio }}</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="fechaLimite" class="block mb-2 text-color-secondary font-medium">Fecha Límite</label>
+            <input id="fechaLimite" type="date" pInputText formControlName="fechaLimite" class="w-full"
+                [ngClass]="{'ng-invalid ng-dirty': form.get('fechaLimite')?.invalid && form.get('fechaLimite')?.touched}">
+            @if (form.get('fechaLimite')?.touched && form.get('fechaLimite')?.errors?.['required']) {
+                <small class="p-error block mt-1">La fecha límite es requerida.</small>
+            }
+        </div>
+    </form>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="modalVisible = false"></p-button>
+        <p-button label="Guardar" (onClick)="guardarTicket()"></p-button>
+    </ng-template>
+</p-dialog>

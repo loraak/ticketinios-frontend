@@ -1,13 +1,21 @@
 import { Injectable, signal, computed } from '@angular/core';
 
 export const PERMISOS = {
+    //  Perfil - Aún no sé cómo manejarlos. 
     PERFIL_EDITAR:  'perfil:editar',
     PERFIL_BAJA:    'perfil:baja',
+    // CRUD de Grupos. 
+    GROUPS_ADMIN: 'groups:admin', 
     GROUPS_VER:     'groups:ver',
-    GROUPS_ADMIN:   'groups:admin',
-    CRUD_VER:       'crud:ver',
-    CRUD_CREAR:     'crud:crear',
-    CRUD_EDITAR:    'crud:editar',
+    GROUPS_CREAR:   'groups:crear',
+    GROUPS_EDITAR:  'groups:editar',
+    GROUPS_BAJA:    'groups:baja',
+    // GRUPO DETALLES. 
+    GROUPS_VER_ESPECIFICO: 'groups:verespecifico',
+    GROUPS_DETALLE_CREAR: 'groups:detail:crear',
+    GROUPS_DETALLE_EDITAR: 'groups:detail:editar', 
+    GROUPS_DETALLE_BAJA: 'groups:detail:baja', 
+    //Usuarios
     USUARIOS_ADMIN: 'usuarios:admin',
     USUARIOS_VER:    'usuarios:ver',      
     USUARIOS_CREAR:  'usuarios:crear',    
@@ -35,11 +43,18 @@ const USUARIOS_MOCK: Usuario[] = [
         permisos: [
             PERMISOS.PERFIL_EDITAR,
             PERMISOS.PERFIL_BAJA,
+            //CRUD de grupos. 
+            PERMISOS.GROUPS_ADMIN, 
             PERMISOS.GROUPS_VER,
-            PERMISOS.GROUPS_ADMIN,
-            PERMISOS.CRUD_VER,
-            PERMISOS.CRUD_CREAR,
-            PERMISOS.CRUD_EDITAR,
+            PERMISOS.GROUPS_CREAR, 
+            PERMISOS.GROUPS_EDITAR, 
+            PERMISOS.GROUPS_BAJA, 
+            //GRUPOS DETALLES. 
+            PERMISOS.GROUPS_VER_ESPECIFICO,
+            PERMISOS.GROUPS_DETALLE_CREAR,
+            PERMISOS.GROUPS_DETALLE_EDITAR, 
+            PERMISOS.GROUPS_DETALLE_BAJA, 
+            //Nosé
             PERMISOS.USUARIOS_ADMIN,
             PERMISOS.TICKETS_ADMIN,
             PERMISOS.USUARIOS_VER,
@@ -54,9 +69,16 @@ const USUARIOS_MOCK: Usuario[] = [
         email: 'usuario@app.com',
         password: '123',
         permisos: [
+            //Perfil
             PERMISOS.PERFIL_EDITAR,
+            //GRUPOS.
             PERMISOS.GROUPS_VER,
-            PERMISOS.CRUD_VER,
+            PERMISOS.GROUPS_VER_ESPECIFICO,
+            PERMISOS.GROUPS_CREAR,
+            //GRUPOS DETALLES. 
+            PERMISOS.GROUPS_DETALLE_CREAR,
+            PERMISOS.GROUPS_DETALLE_EDITAR, 
+            PERMISOS.GROUPS_DETALLE_BAJA, 
         ],
     },
 ];

@@ -1,14 +1,14 @@
 <p-toast></p-toast>
 
-<div class="flex justify-content-center align-items-center" style="min-height: 100vh; background: #f8f9fa;">
+<div class="flex justify-content-center align-items-center" style="min-height: 100vh; background: var(--surface-ground);">
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" style="width: 100%; max-width: 480px;">
         <p-card>
             <ng-template pTemplate="header">
                 <div class="text-center pt-4 pb-2 px-4">
-                    <h2 style="margin: 0.5rem 0 0.25rem; font-size: 1.5rem; font-weight: 700; color: #1e293b;">
+                    <h2 style="margin: 0.5rem 0 0.25rem; font-size: 1.5rem; font-weight: 700; color: var(--text-color);">
                         Iniciar Sesión
                     </h2>
-                    <p style="margin: 0; color: #94a3b8; font-size: 0.875rem;">
+                    <p style="margin: 0; color: var(--text-color-secondary); font-size: 0.875rem;">
                         Ingresa tus credenciales para continuar
                     </p>
                 </div>
@@ -27,10 +27,17 @@
                             [ngClass]="{'ng-invalid ng-dirty': email?.invalid && (email?.dirty || email?.touched)}">
                         <label for="email">Email</label>
                     </p-floatlabel>
-                    <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="mt-1">
-                        <small *ngIf="email?.errors?.['required']" class="p-error block">El email es requerido.</small>
-                        <small *ngIf="email?.errors?.['email']" class="p-error block">El email no es válido.</small>
-                    </div>
+                    
+                    @if (email?.invalid && (email?.dirty || email?.touched)) {
+                        <div class="mt-1">
+                            @if (email?.errors?.['required']) {
+                                <small class="p-error block ng-invalid ng-dirty">El email es requerido.</small>
+                            }
+                            @if (email?.errors?.['email']) {
+                                <small class="p-error block">El email no es válido.</small>
+                            }
+                        </div>
+                    }
                 </div>
 
                 <div>
@@ -45,9 +52,12 @@
                         </p-password>
                         <label for="password">Contraseña</label>
                     </p-floatlabel>
-                    <small *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="p-error block mt-1">
-                        La contraseña es requerida.
-                    </small>
+                    
+                    @if (password?.invalid && (password?.dirty || password?.touched)) {
+                        <small class="p-error block mt-1">
+                            La contraseña es requerida.
+                        </small>
+                    }
                 </div>
 
             </div>

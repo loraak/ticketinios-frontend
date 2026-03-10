@@ -4,16 +4,16 @@
 <p-card>
     <ng-template pTemplate="header">
         <div class="flex justify-content-between align-items-center px-4 pt-3">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e293b;">
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">
                 Gestión de Grupos
             </h2>
-            @if (authService.tienePermiso(PERMISOS.GROUPS_ADMIN)) {
+            @if (authService.tienePermiso(PERMISOS.GROUPS_CREAR)) {
                 <p-button label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
             }
         </div>
     </ng-template>
 
-    <p-table [value]="grupos" [paginator]="true" [rows]="5">
+    <p-table [value]="gruposVisibles" [paginator]="true" [rows]="5">
         <ng-template pTemplate="header">
             <tr>
                 <th>Nivel</th>
@@ -22,9 +22,7 @@
                 <th>Integrantes</th>
                 <th>Tickets</th>
                 <th>Estado</th>
-                @if (authService.tienePermiso(PERMISOS.GROUPS_ADMIN)) {
-                    <th style="width: 10rem;">Acciones</th>
-                }
+                <th style="width: 12rem;">Acciones</th>
             </tr>
         </ng-template>
 
@@ -41,30 +39,36 @@
                         [severity]="grupo.activo ? 'success' : 'danger'">
                     </p-tag>
                 </td>
-                @if (authService.tienePermiso(PERMISOS.GROUPS_ADMIN)) {
-                    <td>
-                        <div class="flex gap-2">
+                <td>
+                    <div class="flex gap-2">
+                        @if (authService.tienePermiso(PERMISOS.GROUPS_VER_ESPECIFICO)) {
+                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true"
+                                severity="info" pTooltip="Ingresar al grupo"
+                                (onClick)="ingresarGrupo()">
+                            </p-button>
+                        }
+
+                        @if (authService.tienePermiso(PERMISOS.GROUPS_EDITAR)) {
                             <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                                pTooltip="Editar grupo"
-                                (onClick)="abrirModalEditar(grupo)"
+                                pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)"
                                 [disabled]="!grupo.activo">
                             </p-button>
+                        }
+
+                        @if (authService.tienePermiso(PERMISOS.GROUPS_BAJA)) {
                             <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                                severity="danger"
-                                pTooltip="Dar de baja"
-                                (onClick)="confirmarBaja(grupo)"
-                                [disabled]="!grupo.activo">
+                                severity="danger" pTooltip="Dar de baja"
+                                (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo">
                             </p-button>
-                        </div>
-                    </td>
-                }
+                        }
+                    </div>
+                </td>
             </tr>
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
             <tr>
-                <td [attr.colspan]="authService.tienePermiso(PERMISOS.GROUPS_ADMIN) ? 7 : 6"
-                    class="text-center p-4 text-color-secondary">
+                <td colspan="7" class="text-center p-4 text-color-secondary">
                     No hay grupos registrados.
                 </td>
             </tr>
@@ -72,6 +76,7 @@
     </p-table>
 </p-card>
 
+<!--Modal-->
 <p-dialog
     [(visible)]="modalVisible"
     [header]="modoEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
@@ -82,6 +87,7 @@
     <form [formGroup]="form">
         <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
 
+            <!--    no sé pq pero el styleclass me sirve para controlar y que se vea bien el input -->
             <p-floatlabel>
                 <input id="nombre" type="text" pInputText formControlName="nombre" class="w-full">
                 <label for="nombre">Nombre</label>
