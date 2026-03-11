@@ -10,12 +10,9 @@
                 <p-button [outlined]="vistaActual !== 'tabla'" icon="pi pi-list" (onClick)="vistaActual = 'tabla'"></p-button>
             </div>
         </div>
-        @if (authService.tienePermiso(PERMISOS.TICKETS_AGREGAR)) {
-            <p-button label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
-        }
+        <p-button *ifHasPermission="['tickets:agregar']" label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
     </div>
 
-    <!-- Filtros rápidos -->
     <div class="flex gap-2 mb-4 flex-wrap">
         <p-button
             label="Todos"
@@ -62,19 +59,17 @@
                     <div class="flex flex-column gap-3">
                         @for (ticket of getTickets(estado); track ticket.id) {
                             <div class="surface-card p-3 border-round shadow-1 border-1 surface-border"
-                                [class.cursor-pointer]="authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
+                                [class.cursor-pointer]="permissionsSvc.hasPermission('tickets:detalle')"
                                 pDraggable="tickets" 
-                                [pDraggableDisabled]="!authService.tienePermiso(PERMISOS.TICKETS_DETALLE)"
+                                [pDraggableDisabled]="!permissionsSvc.hasPermission('tickets:detalle')"
                                 (onDragStart)="dragStart(ticket)" 
                                 (onDragEnd)="dragEnd()" 
-                                (click)="authService.tienePermiso(PERMISOS.TICKETS_DETALLE) ? editarTicket(ticket) : null">
-                                                        
+                                (click)="permissionsSvc.hasPermission('tickets:detalle') ? editarTicket(ticket) : null">
+                                                                                
                                 <div class="flex justify-content-between align-items-start mb-2">
                                     <div class="font-medium text-color">{{ ticket.titulo }}</div>
                                     <div class="flex gap-1">
-                                        @if (authService.tienePermiso(PERMISOS.TICKETS_ELIMINAR)) {
-                                            <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
-                                        }
+                                        <p-button *ifHasPermission="['tickets:eliminar']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
                                     </div>
                                 </div>
                                 
@@ -124,8 +119,8 @@
                 <ng-template pTemplate="body" let-ticket>
                     <tr>
                         <td class="font-medium text-primary" 
-                            [class.cursor-pointer]="authService.tienePermiso(PERMISOS.TICKETS_DETALLE)" 
-                            (click)="authService.tienePermiso(PERMISOS.TICKETS_DETALLE) ? editarTicket(ticket) : null">
+                            [class.cursor-pointer]="permissionsSvc.hasPermission('tickets:detalle')" 
+                            (click)="permissionsSvc.hasPermission('tickets:detalle') ? editarTicket(ticket) : null">
                             #{{ ticket.id }} - {{ ticket.titulo }}
                         </td>
                         <td><p-tag [value]="ticket.estado" severity="info"></p-tag></td>
@@ -135,12 +130,8 @@
                         <td>{{ ticket.grupo }}</td>
                         <td>{{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</td>
                         <td class="text-center">
-                            @if (authService.tienePermiso(PERMISOS.TICKETS_DETALLE)) {
-                                <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" (onClick)="editarTicket(ticket)"></p-button>
-                            }
-                            @if (authService.tienePermiso(PERMISOS.TICKETS_ELIMINAR)) {
-                                <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (onClick)="eliminarTicket(ticket)"></p-button>
-                            }
+                            <p-button *ifHasPermission="['tickets:detalle']" icon="pi pi-pencil" [text]="true" [rounded]="true" size="small" (onClick)="editarTicket(ticket)"></p-button>
+                            <p-button *ifHasPermission="['tickets:eliminar']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (onClick)="eliminarTicket(ticket)"></p-button>
                         </td>
                     </tr>
                 </ng-template>

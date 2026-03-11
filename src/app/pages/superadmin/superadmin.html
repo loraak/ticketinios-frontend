@@ -76,7 +76,6 @@
     </p-table>
 </p-card>
 
-<!-- Modal permisos -->
 <p-dialog
     [(visible)]="modalPermisosVisible"
     [modal]="true"
@@ -92,7 +91,6 @@
         </div>
     </ng-template>
 
-    <!-- Acciones rápidas -->
     <div class="flex gap-2 mb-3 pt-2">
         <p-button label="Seleccionar todos" size="small" [text]="true"
             icon="pi pi-check-square"
@@ -107,12 +105,10 @@
 
     <p-divider styleClass="my-2"></p-divider>
 
-    <!-- Permisos agrupados -->
     <div style="max-height: 420px; overflow-y: auto; padding-right: 0.25rem;">
         @for (grupo of gruposPermisos; track grupo) {
             <div class="mb-3">
 
-                <!-- Header del grupo con toggle -->
                 <div class="flex align-items-center justify-content-between mb-2 px-1"
                     style="cursor: pointer;"
                     (click)="toggleGrupo(grupo)">
@@ -128,11 +124,10 @@
                     </p-button>
                 </div>
 
-                <!-- Items del grupo -->
                 @for (item of permisosPorGrupo(grupo); track item.permiso) {
                     <div class="flex align-items-center gap-3 p-2 border-round mb-1"
                         style="cursor: pointer; transition: background 0.15s;"
-                        [style.background]="tienePermiso(item.permiso) ? 'var(--primary-50, #eff6ff)' : 'transparent'"
+                        [style.background]="'transparent'"
                         (click)="togglePermiso(item.permiso)">
                         <p-checkbox
                             [binary]="true"
@@ -160,7 +155,6 @@
     </ng-template>
 </p-dialog>
 
-<!-- Modal nuevo/editar usuario -->
 <p-dialog
     [(visible)]="modalUsuarioVisible"
     [header]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'"

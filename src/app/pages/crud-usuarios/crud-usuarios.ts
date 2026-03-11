@@ -14,7 +14,9 @@ import { PasswordModule } from 'primeng/password';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { AuthService, PERMISOS } from '../../services/auth.service';
+
+import { PermissionsService } from '../../services/permissions.service'; 
+import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
 
 export interface UsuarioCrud {
     id: string;
@@ -38,14 +40,14 @@ export interface GrupoOpcion {
         TableModule, CardModule, ButtonModule, DialogModule,
         InputTextModule, TagModule, ToastModule, ConfirmDialogModule,
         FloatLabelModule, PasswordModule, MultiSelectModule, DividerModule,
+        HasPermissionDirective // <-- Importamos la directiva
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './crud-usuarios.html',
     styleUrl: './crud-usuarios.css'
 })
 export class Usuarios {
-    protected authService = inject(AuthService);
-    protected PERMISOS = PERMISOS;
+    protected permissionsSvc = inject(PermissionsService);
 
     grupos: GrupoOpcion[] = [
         { id: 1, nombre: 'Joestar'     },
@@ -63,23 +65,19 @@ export class Usuarios {
         { id: '3', nombreCompleto: 'Juan Prueba',   email: 'juan@app.com',    password: '123', grupos: [],     activo: false },
     ];
 
-    // Retorna usuarios que pertenecen a un grupo
     usuariosPorGrupo(grupoId: number): UsuarioCrud[] {
         return this.usuarios.filter(u => u.grupos.includes(grupoId));
     }
 
-    // Retorna usuarios sin grupo asignado
     get usuariosSinGrupo(): UsuarioCrud[] {
         return this.usuarios.filter(u => u.grupos.length === 0);
     }
 
-    // Modal usuario
     modalUsuarioVisible = false;
     modoEdicion = false;
     usuarioSeleccionado: UsuarioCrud | null = null;
     formUsuario: FormGroup;
 
-    // Modal grupo
     modalGrupoVisible = false;
     formGrupo: FormGroup;
 
@@ -100,7 +98,6 @@ export class Usuarios {
         });
     }
 
-    // — Grupos —
     abrirModalGrupo() {
         this.formGrupo.reset();
         this.modalGrupoVisible = true;
@@ -141,7 +138,6 @@ export class Usuarios {
         });
     }
 
-    // — Usuarios —
     abrirModalNuevo() {
         this.modoEdicion = false;
         this.usuarioSeleccionado = null;

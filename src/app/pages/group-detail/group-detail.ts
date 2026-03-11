@@ -9,10 +9,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { AuthService, PERMISOS } from '../../services/auth.service';
 import { DragDropModule } from 'primeng/dragdrop'; 
 import { TableModule } from 'primeng/table';
+import { ConfirmationService, MessageService } from 'primeng/api';
+
+import { AuthService } from '../../services/auth.service';
+import { PermissionsService } from '../../services/permissions.service'; // Ajusta la ruta
+import { HasPermissionDirective } from '../../directives/has-permission.directive'; // Ajusta la ruta
 
 export interface Ticket { 
   id: number; 
@@ -30,19 +33,20 @@ export interface Ticket {
   imports: [
     CommonModule, ReactiveFormsModule, ButtonModule, TagModule, TableModule,
     DialogModule, InputTextModule, DragDropModule,
-    FloatLabelModule, ConfirmDialogModule, ToastModule
+    FloatLabelModule, ConfirmDialogModule, ToastModule,
+    HasPermissionDirective // <-- Importante
   ], 
   providers: [ConfirmationService, MessageService],
   templateUrl: './group-detail.html',
   styleUrl: './group-detail.css',
 })
-
 export class GroupDetail {
   private fb = inject(FormBuilder);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   protected authService = inject(AuthService); 
-  protected PERMISOS = PERMISOS; 
+  protected permissionsSvc = inject(PermissionsService); // <-- Inyectado
+  
   ticketArrastrado: Ticket | null = null; 
   vistaActual: 'kanban' | 'tabla' = 'kanban'; 
 
@@ -148,9 +152,8 @@ export class GroupDetail {
     this.modalVisible = false;
   }
 
-  usuarioActual = 'César Usuario'; 
-
   get misTickets() {
-    return this.tickets.filter(t => t.asignado === this.usuarioActual);
+    const usuarioActual = (this.authService.usuario() as any)?.nombreCompleto;
+    return this.tickets.filter(t => t.asignado === usuarioActual);
   }
 }

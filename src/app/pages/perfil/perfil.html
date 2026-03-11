@@ -3,7 +3,6 @@
 
 <div class="w-full">
 
-    <!-- Card principal -->
     <p-card styleClass="mb-4">
         <div class="flex align-items-center justify-content-between">
             <div class="flex align-items-center gap-3">
@@ -18,12 +17,12 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+                <p-button *ifHasPermission="['perfil:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true"
                     pTooltip="Editar perfil"
                     (onClick)="abrirEditar()"
                     [disabled]="!usuario.activo">
                 </p-button>
-                <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
+                <p-button *ifHasPermission="['perfil:baja']" icon="pi pi-ban" [rounded]="true" [text]="true"
                     severity="danger" pTooltip="Dar de baja"
                     (onClick)="confirmarBaja()"
                     [disabled]="!usuario.activo">
@@ -32,7 +31,6 @@
         </div>
     </p-card>
 
-    <!-- Información personal -->
     <p-card header="Información Personal" styleClass="mb-4">
         <div class="flex flex-column gap-3">
 
@@ -83,7 +81,6 @@
         </div>
     </p-card>
 
-    <!-- Resumen de carga de trabajo -->
     <p-card header="Carga de Trabajo" styleClass="mb-4">
         <div class="grid">
             <div class="col-6 md:col-3 text-center">
@@ -106,18 +103,17 @@
 
         <p-divider></p-divider>
 
-        <!-- Barra de progreso visual -->
         <div style="height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden;">
             <div style="height: 100%; display: flex;">
-                <div [style.width.%]="(resumen.hecho / resumen.total) * 100"
-                     style="background: #22c55e; transition: width 0.3s;">
-                </div>
-                <div [style.width.%]="(resumen.enProgreso / resumen.total) * 100"
-                     style="background: #f59e0b; transition: width 0.3s;">
-                </div>
-                <div [style.width.%]="(resumen.bloqueado / resumen.total) * 100"
-                     style="background: #ef4444; transition: width 0.3s;">
-                </div>
+                    <div [style.width.%]="(resumen.hecho / resumen.total) * 100"
+                        style="background: #22c55e; transition: width 0.3s;">
+                    </div>
+                    <div [style.width.%]="(resumen.enProgreso / resumen.total) * 100"
+                        style="background: #f59e0b; transition: width 0.3s;">
+                    </div>
+                    <div [style.width.%]="(resumen.bloqueado / resumen.total) * 100"
+                        style="background: #ef4444; transition: width 0.3s;">
+                    </div>
             </div>
         </div>
         <div class="flex gap-3 mt-2">
@@ -136,7 +132,6 @@
         </div>
     </p-card>
 
-    <!-- Tickets asignados -->
     <p-card header="Mis Tickets">
         <p-table
             [value]="ticketsAsignados"
@@ -179,7 +174,6 @@
 
 </div>
 
-<!-- Modal Editar -->
 <p-dialog
     [(visible)]="modalVisible"
     header="Editar Perfil"

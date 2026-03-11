@@ -1,6 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MessageService, ConfirmationService } from 'primeng/api';
+
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -14,57 +16,55 @@ import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { PERMISOS, Permiso } from '../../services/auth.service';
 
 export interface UsuarioAdmin {
     id: string;
     nombreCompleto: string;
     email: string;
     password: string;
-    permisos: Permiso[];
+    permisos: string[];
     activo: boolean;
 }
 
 export interface PermisoLegible {
-    permiso: Permiso;
+    permiso: string;
     label: string;
     grupo: string;
 }
 
 export const PERMISOS_LEGIBLES: PermisoLegible[] = [
     // Perfil
-    { permiso: PERMISOS.PERFIL_EDITAR,            label: 'Editar perfil',                grupo: 'Perfil'           },
-    { permiso: PERMISOS.PERFIL_BAJA,              label: 'Dar de baja perfil',            grupo: 'Perfil'           },
+    { permiso: 'perfil:editar',           label: 'Editar perfil',                grupo: 'Perfil'           },
+    { permiso: 'perfil:baja',             label: 'Dar de baja perfil',           grupo: 'Perfil'           },
     // Grupos CRUD
-    { permiso: PERMISOS.GROUPS_ADMIN,             label: 'Administrar grupos',            grupo: 'Grupos'           },
-    { permiso: PERMISOS.GROUPS_VER,               label: 'Ver grupos',                    grupo: 'Grupos'           },
-    { permiso: PERMISOS.GROUPS_CREAR,             label: 'Crear grupos',                  grupo: 'Grupos'           },
-    { permiso: PERMISOS.GROUPS_EDITAR,            label: 'Editar grupos',                 grupo: 'Grupos'           },
-    { permiso: PERMISOS.GROUPS_BAJA,              label: 'Dar de baja grupos',            grupo: 'Grupos'           },
+    { permiso: 'groups:admin',            label: 'Administrar grupos',           grupo: 'Grupos'           },
+    { permiso: 'groups:ver',              label: 'Ver grupos',                   grupo: 'Grupos'           },
+    { permiso: 'groups:crear',            label: 'Crear grupos',                 grupo: 'Grupos'           },
+    { permiso: 'groups:editar',           label: 'Editar grupos',                grupo: 'Grupos'           },
+    { permiso: 'groups:baja',             label: 'Dar de baja grupos',           grupo: 'Grupos'           },
     // Grupos detalle
-    { permiso: PERMISOS.GROUPS_VER_ESPECIFICO,    label: 'Ver grupo específico',          grupo: 'Grupos — Detalle' },
-    { permiso: PERMISOS.GROUPS_DETALLE_CREAR,     label: 'Agregar miembros al grupo',     grupo: 'Grupos — Detalle' },
-    { permiso: PERMISOS.GROUPS_DETALLE_EDITAR,    label: 'Editar miembros del grupo',     grupo: 'Grupos — Detalle' },
-    { permiso: PERMISOS.GROUPS_DETALLE_BAJA,      label: 'Eliminar miembros del grupo',   grupo: 'Grupos — Detalle' },
-    { permiso: PERMISOS.GROUPS_MIS_TICKETS,       label: 'Ver mis tickets del grupo',     grupo: 'Grupos — Detalle' },
+    { permiso: 'groups:verespecifico',    label: 'Ver grupo específico',         grupo: 'Grupos — Detalle' },
+    { permiso: 'groups:detail:crear',     label: 'Agregar miembros al grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'groups:detail:editar',    label: 'Editar miembros del grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'groups:detail:baja',      label: 'Eliminar miembros del grupo',  grupo: 'Grupos — Detalle' },
+    { permiso: 'groups:mistickets',       label: 'Ver mis tickets del grupo',    grupo: 'Grupos — Detalle' },
     // Usuarios
-    { permiso: PERMISOS.USUARIOS_VER,             label: 'Ver usuarios',                  grupo: 'Usuarios'         },
-    { permiso: PERMISOS.USUARIOS_CREAR,           label: 'Crear usuarios',                grupo: 'Usuarios'         },
-    { permiso: PERMISOS.USUARIOS_EDITAR,          label: 'Editar usuarios',               grupo: 'Usuarios'         },
-    { permiso: PERMISOS.USUARIOS_BAJA,            label: 'Dar de baja usuarios',          grupo: 'Usuarios'         },
+    { permiso: 'usuarios:ver',            label: 'Ver usuarios',                 grupo: 'Usuarios'         },
+    { permiso: 'usuarios:crear',          label: 'Crear usuarios',               grupo: 'Usuarios'         },
+    { permiso: 'usuarios:editar',         label: 'Editar usuarios',              grupo: 'Usuarios'         },
+    { permiso: 'usuarios:baja',           label: 'Dar de baja usuarios',         grupo: 'Usuarios'         },
     // Tickets
-    { permiso: PERMISOS.TICKETS_VER,              label: 'Ver tickets',                   grupo: 'Tickets'          },
-    { permiso: PERMISOS.TICKETS_AGREGAR,          label: 'Crear tickets',                 grupo: 'Tickets'          },
-    { permiso: PERMISOS.TICKETS_ADMIN,            label: 'Administrar tickets',           grupo: 'Tickets'          },
-    { permiso: PERMISOS.TICKETS_EDITAR,           label: 'Editar tickets',                grupo: 'Tickets'          },
-    { permiso: PERMISOS.TICKETS_ELIMINAR,         label: 'Eliminar tickets',              grupo: 'Tickets'          },
-    { permiso: PERMISOS.TICKETS_DETALLE,          label: 'Ver detalle de tickets',        grupo: 'Tickets'          },
+    { permiso: 'tickets:ver',             label: 'Ver tickets',                  grupo: 'Tickets'          },
+    { permiso: 'tickets:agregar',         label: 'Crear tickets',                grupo: 'Tickets'          },
+    { permiso: 'tickets:admin',           label: 'Administrar tickets',          grupo: 'Tickets'          },
+    { permiso: 'tickets:editar',          label: 'Editar tickets',               grupo: 'Tickets'          },
+    { permiso: 'tickets:eliminar',        label: 'Eliminar tickets',             grupo: 'Tickets'          },
+    { permiso: 'tickets:detalle',         label: 'Ver detalle de tickets',       grupo: 'Tickets'          },
     // Superadmin
-    { permiso: PERMISOS.SUPERADMIN_VER,           label: 'Ver panel superadmin',          grupo: 'Superadmin'       },
-    { permiso: PERMISOS.SUPERADMIN_CREAR,         label: 'Crear en superadmin',           grupo: 'Superadmin'       },
-    { permiso: PERMISOS.SUPERADMIN_EDITAR,        label: 'Editar en superadmin',          grupo: 'Superadmin'       },
-    { permiso: PERMISOS.SUPERADMIN_BAJA,          label: 'Dar de baja en superadmin',     grupo: 'Superadmin'       },
+    { permiso: 'superadmin:ver',          label: 'Ver panel superadmin',         grupo: 'Superadmin'       },
+    { permiso: 'superadmin:crear',        label: 'Crear en superadmin',          grupo: 'Superadmin'       },
+    { permiso: 'superadmin:editar',       label: 'Editar en superadmin',         grupo: 'Superadmin'       },
+    { permiso: 'superadmin:baja',         label: 'Dar de baja en superadmin',    grupo: 'Superadmin'       },
 ];
 
 @Component({
@@ -84,7 +84,6 @@ export const PERMISOS_LEGIBLES: PermisoLegible[] = [
 export class Superadmin {
     protected PERMISOS_LEGIBLES = PERMISOS_LEGIBLES;
 
-    // Grupos únicos para separar visualmente los permisos en el modal
     get gruposPermisos(): string[] {
         return [...new Set(PERMISOS_LEGIBLES.map(p => p.grupo))];
     }
@@ -98,36 +97,34 @@ export class Superadmin {
             id: '1', nombreCompleto: 'César Admin', email: 'admin@app.com',
             password: '123', activo: true,
             permisos: [
-                PERMISOS.PERFIL_EDITAR, PERMISOS.PERFIL_BAJA,
-                PERMISOS.GROUPS_ADMIN, PERMISOS.GROUPS_VER, PERMISOS.GROUPS_CREAR, PERMISOS.GROUPS_EDITAR, PERMISOS.GROUPS_BAJA,
-                PERMISOS.GROUPS_VER_ESPECIFICO, PERMISOS.GROUPS_DETALLE_CREAR, PERMISOS.GROUPS_DETALLE_EDITAR, PERMISOS.GROUPS_DETALLE_BAJA,
-                PERMISOS.USUARIOS_VER, PERMISOS.USUARIOS_CREAR, PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA,
-                PERMISOS.TICKETS_ADMIN, PERMISOS.TICKETS_VER, PERMISOS.TICKETS_AGREGAR, PERMISOS.TICKETS_EDITAR, PERMISOS.TICKETS_ELIMINAR, PERMISOS.TICKETS_DETALLE,
+                'perfil:editar', 'perfil:baja',
+                'groups:admin', 'groups:ver', 'groups:crear', 'groups:editar', 'groups:baja',
+                'groups:verespecifico', 'groups:detail:crear', 'groups:detail:editar', 'groups:detail:baja',
+                'usuarios:ver', 'usuarios:crear', 'usuarios:editar', 'usuarios:baja',
+                'tickets:admin', 'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle',
             ],
         },
         {
             id: '2', nombreCompleto: 'César Usuario', email: 'usuario@app.com',
             password: '123', activo: true,
             permisos: [
-                PERMISOS.PERFIL_EDITAR,
-                PERMISOS.GROUPS_VER, PERMISOS.GROUPS_VER_ESPECIFICO, PERMISOS.GROUPS_CREAR,
-                PERMISOS.GROUPS_DETALLE_CREAR, PERMISOS.GROUPS_DETALLE_EDITAR, PERMISOS.GROUPS_DETALLE_BAJA, PERMISOS.GROUPS_MIS_TICKETS,
-                PERMISOS.TICKETS_VER, PERMISOS.TICKETS_AGREGAR, PERMISOS.TICKETS_EDITAR, PERMISOS.TICKETS_ELIMINAR, PERMISOS.TICKETS_DETALLE,
+                'perfil:editar',
+                'groups:ver', 'groups:verespecifico', 'groups:crear',
+                'groups:detail:crear', 'groups:detail:editar', 'groups:detail:baja', 'groups:mistickets',
+                'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle',
             ],
         },
         {
             id: '3', nombreCompleto: 'César SuperAdmin', email: 'superadmin@app.com',
             password: '123', activo: true,
-            permisos: Object.values(PERMISOS) as Permiso[],
+            permisos: PERMISOS_LEGIBLES.map(p => p.permiso),
         },
     ];
 
-    // — Modal permisos —
     modalPermisosVisible = false;
     usuarioSeleccionado: UsuarioAdmin | null = null;
-    permisosSeleccionados: Permiso[] = [];
+    permisosSeleccionados: string[] = [];
 
-    // — Modal usuario —
     modalUsuarioVisible = false;
     modoEdicion = false;
     usuarioEnEdicion: UsuarioAdmin | null = null;
@@ -145,18 +142,17 @@ export class Superadmin {
         });
     }
 
-    // — Permisos —
     abrirPermisos(usuario: UsuarioAdmin) {
         this.usuarioSeleccionado = usuario;
         this.permisosSeleccionados = [...usuario.permisos];
         this.modalPermisosVisible = true;
     }
 
-    tienePermiso(permiso: Permiso): boolean {
+    tienePermiso(permiso: string): boolean {
         return this.permisosSeleccionados.includes(permiso);
     }
 
-    togglePermiso(permiso: Permiso) {
+    togglePermiso(permiso: string) {
         if (this.tienePermiso(permiso)) {
             this.permisosSeleccionados = this.permisosSeleccionados.filter(p => p !== permiso);
         } else {
@@ -165,7 +161,7 @@ export class Superadmin {
     }
 
     seleccionarTodos() {
-        this.permisosSeleccionados = Object.values(PERMISOS) as Permiso[];
+        this.permisosSeleccionados = PERMISOS_LEGIBLES.map(p => p.permiso);
     }
 
     limpiarTodos() {
@@ -194,7 +190,6 @@ export class Superadmin {
         this.modalPermisosVisible = false;
     }
 
-    // — CRUD usuarios —
     abrirNuevo() {
         this.modoEdicion = false;
         this.usuarioEnEdicion = null;

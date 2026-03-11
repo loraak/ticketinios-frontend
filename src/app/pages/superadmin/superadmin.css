@@ -1,0 +1,9 @@
+.p-checkbox.p-checkbox-checked .p-checkbox-box {
+    background: transparent !important;
+    border-color: var(--primary-color) !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+    background: transparent !important;
+    border-color: var(--primary-color) !important;
+}

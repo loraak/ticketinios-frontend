@@ -1,19 +1,23 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MessageService, ConfirmationService } from 'primeng/api';
+
+import { TableModule } from 'primeng/table';
+import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
-import { DragDropModule } from 'primeng/dragdrop';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
-import { TableModule } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { CardModule } from 'primeng/card';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { AuthService, PERMISOS } from '../../services/auth.service'; // Ajusta la ruta
+import { DragDropModule } from 'primeng/dragdrop';
+
+import { AuthService } from '../../services/auth.service'; 
+import { PermissionsService } from '../../services/permissions.service'; 
+import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
 
 export interface Comentario { autor: string; texto: string; fecha: Date; }
 export interface Historial { accion: string; fecha: Date; }
@@ -39,7 +43,8 @@ export interface Ticket {
         CommonModule, FormsModule, ReactiveFormsModule,
         TableModule, CardModule, ButtonModule, DialogModule,
         InputTextModule, TextareaModule, TagModule, ToastModule,
-        ConfirmDialogModule, FloatLabelModule, DragDropModule
+        ConfirmDialogModule, FloatLabelModule, DragDropModule,
+        HasPermissionDirective 
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './tickets.html',
@@ -49,8 +54,9 @@ export class Tickets implements OnInit {
     private fb = inject(FormBuilder); 
     private confirmationService = inject(ConfirmationService);
     private messageService = inject(MessageService); 
+    
     protected authService = inject(AuthService);
-    protected PERMISOS = PERMISOS;
+    protected permissionsSvc = inject(PermissionsService);
 
     vistaActual: 'kanban' | 'tabla' = 'kanban';
     ticketArrastrado: Ticket | null = null; 
@@ -84,8 +90,8 @@ export class Tickets implements OnInit {
     filtroActivo: 'todos' | 'mis-tickets' | 'sin-asignar' | 'alta-prioridad' = 'todos';
 
     get ticketsVisibles() {
-        const nombreUsuario = this.authService.usuario()?.nombreCompleto;
-        const esAdmin = this.authService.tienePermiso(this.PERMISOS.TICKETS_ADMIN);
+        const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto;
+        const esAdmin = this.permissionsSvc.hasPermission('tickets:admin');
 
         let base = esAdmin
             ? this.ticketsTotales
@@ -115,7 +121,7 @@ export class Tickets implements OnInit {
 
     dragStart(ticket: Ticket) { this.ticketArrastrado = ticket; }
     dragEnd() { this.ticketArrastrado = null; }
-  
+
     drop(estadoDestino: string) {
         if (this.ticketArrastrado && this.ticketArrastrado.estado !== estadoDestino) {
             this.ticketArrastrado.historial.push({ accion: `Movido a ${estadoDestino}`, fecha: new Date() });
@@ -133,8 +139,8 @@ export class Tickets implements OnInit {
         const fecha = new Date(ticket.fechaLimite).toISOString().split('T')[0];
         this.form.patchValue({ ...ticket, fechaLimite: fecha });
 
-        const nombreUsuario = this.authService.usuario()?.nombreCompleto;
-        const tienePermisoAdmin = this.authService.tienePermiso(this.PERMISOS.TICKETS_ADMIN);
+        const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto;
+        const tienePermisoAdmin = this.permissionsSvc.hasPermission('tickets:admin');
 
         if (tienePermisoAdmin || ticket.creador === nombreUsuario) {
             this.form.enable();
@@ -150,14 +156,14 @@ export class Tickets implements OnInit {
     agregarComentario(inputEl: HTMLInputElement) {
         const texto = inputEl.value.trim();
         if (!texto || !this.ticketSeleccionado) return;
-        const nombreUsuario = this.authService.usuario()?.nombreCompleto || 'Usuario';
+        const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto || 'Usuario';
         this.ticketSeleccionado.comentarios.push({ autor: nombreUsuario, texto, fecha: new Date() });
         inputEl.value = '';
     }
 
     eliminarTicket(ticket: Ticket) {
-        const nombreUsuario = this.authService.usuario()?.nombreCompleto;
-        const esAdmin = this.authService.tienePermiso(this.PERMISOS.TICKETS_ADMIN);
+        const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto;
+        const esAdmin = this.permissionsSvc.hasPermission('tickets:admin');
 
         if (esAdmin || ticket.creador === nombreUsuario) {
             this.confirmationService.confirm({
@@ -196,7 +202,7 @@ export class Tickets implements OnInit {
 
             this.ticketsTotales[idx] = { ...t, ...values, fechaLimite: new Date(values.fechaLimite) };
         } else {
-            const nombreUsuario = this.authService.usuario()?.nombreCompleto || 'Usuario';
+            const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto || 'Usuario';
             const nuevo: Ticket = { 
                 id: Date.now(), ...values, creador: nombreUsuario,
                 fechaCreacion: new Date(), fechaLimite: new Date(values.fechaLimite), comentarios: [], historial: [{accion: 'Creado', fecha: new Date()}], grupo: 'General'

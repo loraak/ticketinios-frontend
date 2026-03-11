@@ -8,33 +8,26 @@
                 Gestión de Usuarios
             </h2>
             <div class="flex gap-2">
-                @if (authService.tienePermiso(PERMISOS.GROUPS_ADMIN)) {
-                    <p-button label="Nuevo Grupo" icon="pi pi-plus" severity="secondary"
-                        (onClick)="abrirModalGrupo()">
-                    </p-button>
-                }
-                @if (authService.tienePermiso(PERMISOS.USUARIOS_CREAR)) {
-                    <p-button label="Nuevo Usuario" icon="pi pi-plus"
-                        (onClick)="abrirModalNuevo()">
-                    </p-button>
-                }
+                <p-button *ifHasPermission="['groups:admin']" label="Nuevo Grupo" icon="pi pi-plus" severity="secondary"
+                    (onClick)="abrirModalGrupo()">
+                </p-button>
+                <p-button *ifHasPermission="['usuarios:crear']" label="Nuevo Usuario" icon="pi pi-plus"
+                    (onClick)="abrirModalNuevo()">
+                </p-button>
             </div>
         </div>
     </ng-template>
 
     <div style="display: flex; flex-direction: column; gap: 2rem;">
 
-        <!-- Tabla por cada grupo -->
         @for (grupo of grupos; track grupo.id) {
             <div>
                 <div class="flex align-items-center justify-content-between mb-2">
-                    @if (authService.tienePermiso(PERMISOS.GROUPS_ADMIN)) {
-                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
-                            severity="danger"
-                            pTooltip="Eliminar grupo"
-                            (onClick)="confirmarEliminarGrupo(grupo)">
-                        </p-button>
-                    }
+                    <p-button *ifHasPermission="['groups:admin']" icon="pi pi-trash" [rounded]="true" [text]="true"
+                        severity="danger"
+                        pTooltip="Eliminar grupo"
+                        (onClick)="confirmarEliminarGrupo(grupo)">
+                    </p-button>
                 </div>
 
                 <p-table
@@ -45,7 +38,7 @@
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Estado</th>
-                            @if (authService.tieneAlgunPermiso([PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA])) {
+                            @if (permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja'])) {
                                 <th style="width: 8rem;">Acciones</th>
                             }
                         </tr>
@@ -61,24 +54,20 @@
                                     [severity]="usuario.activo ? 'success' : 'danger'">
                                 </p-tag>
                             </td>
-                            @if (authService.tieneAlgunPermiso([PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA])) {
+                            @if (permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja'])) {
                                 <td>
                                     <div class="flex gap-2">
-                                        @if (authService.tienePermiso(PERMISOS.USUARIOS_EDITAR)) {
-                                            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                                                pTooltip="Editar"
-                                                (onClick)="abrirModalEditar(usuario)"
-                                                [disabled]="!usuario.activo">
-                                            </p-button>
-                                        }
-                                        @if (authService.tienePermiso(PERMISOS.USUARIOS_BAJA)) {
-                                            <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                                                severity="danger"
-                                                pTooltip="Dar de baja"
-                                                (onClick)="confirmarBaja(usuario)"
-                                                [disabled]="!usuario.activo">
-                                            </p-button>
-                                        }
+                                        <p-button *ifHasPermission="['usuarios:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true"
+                                            pTooltip="Editar"
+                                            (onClick)="abrirModalEditar(usuario)"
+                                            [disabled]="!usuario.activo">
+                                        </p-button>
+                                        <p-button *ifHasPermission="['usuarios:baja']" icon="pi pi-ban" [rounded]="true" [text]="true"
+                                            severity="danger"
+                                            pTooltip="Dar de baja"
+                                            (onClick)="confirmarBaja(usuario)"
+                                            [disabled]="!usuario.activo">
+                                        </p-button>
                                     </div>
                                 </td>
                             }
@@ -87,7 +76,7 @@
 
                     <ng-template pTemplate="emptymessage">
                         <tr>
-                            <td [attr.colspan]="authService.tieneAlgunPermiso([PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA]) ? 4 : 3"
+                            <td [attr.colspan]="permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja']) ? 4 : 3"
                                 class="text-center p-3 text-color-secondary">
                                 Sin usuarios en este grupo.
                             </td>
@@ -99,7 +88,6 @@
             </div>
         }
 
-        <!-- Usuarios sin grupo -->
         @if (usuariosSinGrupo.length > 0) {
             <div>
                 <div class="flex align-items-center gap-2 mb-2">
@@ -114,7 +102,7 @@
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Estado</th>
-                            @if (authService.tieneAlgunPermiso([PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA])) {
+                            @if (permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja'])) {
                                 <th style="width: 8rem;">Acciones</th>
                             }
                         </tr>
@@ -130,27 +118,32 @@
                                     [severity]="usuario.activo ? 'success' : 'danger'">
                                 </p-tag>
                             </td>
-                            @if (authService.tieneAlgunPermiso([PERMISOS.USUARIOS_EDITAR, PERMISOS.USUARIOS_BAJA])) {
+                            @if (permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja'])) {
                                 <td>
                                     <div class="flex gap-2">
-                                        @if (authService.tienePermiso(PERMISOS.USUARIOS_EDITAR)) {
-                                            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                                                pTooltip="Editar"
-                                                (onClick)="abrirModalEditar(usuario)"
-                                                [disabled]="!usuario.activo">
-                                            </p-button>
-                                        }
-                                        @if (authService.tienePermiso(PERMISOS.USUARIOS_BAJA)) {
-                                            <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                                                severity="danger"
-                                                pTooltip="Dar de baja"
-                                                (onClick)="confirmarBaja(usuario)"
-                                                [disabled]="!usuario.activo">
-                                            </p-button>
-                                        }
+                                        <p-button *ifHasPermission="['usuarios:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true"
+                                            pTooltip="Editar"
+                                            (onClick)="abrirModalEditar(usuario)"
+                                            [disabled]="!usuario.activo">
+                                        </p-button>
+                                        <p-button *ifHasPermission="['usuarios:baja']" icon="pi pi-ban" [rounded]="true" [text]="true"
+                                            severity="danger"
+                                            pTooltip="Dar de baja"
+                                            (onClick)="confirmarBaja(usuario)"
+                                            [disabled]="!usuario.activo">
+                                        </p-button>
                                     </div>
                                 </td>
                             }
+                        </tr>
+                    </ng-template>
+                    
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td [attr.colspan]="permissionsSvc.hasAnyPermission(['usuarios:editar', 'usuarios:baja']) ? 4 : 3"
+                                class="text-center p-3 text-color-secondary">
+                                No hay usuarios sin grupo.
+                            </td>
                         </tr>
                     </ng-template>
                 </p-table>
@@ -160,7 +153,6 @@
     </div>
 </p-card>
 
-<!-- Modal nuevo grupo -->
 <p-dialog
     [(visible)]="modalGrupoVisible"
     header="Nuevo Grupo"
@@ -189,7 +181,6 @@
     </ng-template>
 </p-dialog>
 
-<!-- Modal nuevo/editar usuario -->
 <p-dialog
     [(visible)]="modalUsuarioVisible"
     [header]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'"

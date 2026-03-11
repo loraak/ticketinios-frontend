@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard, permisoGuard } from './guards/auth.guard';
-import { PERMISOS } from './services/auth.service';
 
 export const routes: Routes = [
     { path: '',        redirectTo: 'login', pathMatch: 'full' },
@@ -15,11 +14,11 @@ export const routes: Routes = [
             { path: '',       redirectTo: 'home', pathMatch: 'full' }, 
             { path: 'home',   loadComponent: () => import('./pages/home/home').then(m => m.Home) },
             { path: 'perfil', loadComponent: () => import('./pages/perfil/perfil').then(m => m.Perfil) },
-            { path: 'crud',   canActivate: [permisoGuard(PERMISOS.GROUPS_VER)],   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
-            { path: 'usuarios',   canActivate: [permisoGuard(PERMISOS.USUARIOS_VER)],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
-            { path: 'tickets', canActivate: [permisoGuard(PERMISOS.TICKETS_VER)],  loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
-            { path: 'groupDetails',   canActivate: [permisoGuard(PERMISOS.GROUPS_VER_ESPECIFICO)],   loadComponent: () => import('./pages/group-detail/group-detail').then(m => m.GroupDetail) },
-            { path: 'superadmin', canActivate: [permisoGuard(PERMISOS.SUPERADMIN_VER)], loadComponent: () => import('./pages/superadmin/superadmin').then(m => m.Superadmin)},
+            { path: 'crud',   canActivate: [permisoGuard('groups:ver')],   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
+            { path: 'usuarios',   canActivate: [permisoGuard('usuarios:ver')],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
+            { path: 'tickets', canActivate: [permisoGuard('tickets:ver')],  loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
+            { path: 'groupDetails',   canActivate: [permisoGuard('groups:verespecifico')],   loadComponent: () => import('./pages/group-detail/group-detail').then(m => m.GroupDetail) },
+            { path: 'superadmin', canActivate: [permisoGuard('superadmin:ver')], loadComponent: () => import('./pages/superadmin/superadmin').then(m => m.Superadmin)},
         ]
     },
     { path: '**', redirectTo: 'landing' } 

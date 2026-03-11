@@ -7,16 +7,15 @@
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">
                 Gestión de Grupos
             </h2>
-            @if (authService.tienePermiso(PERMISOS.GROUPS_CREAR)) {
-                <p-button label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
-            }
+            <p-button *ifHasPermission="['groups:crear']" label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
         </div>
     </ng-template>
 
     <p-table [value]="gruposVisibles" [paginator]="true" [rows]="5" dataKey="id" [expandedRowKeys]="expandedRows">
         <ng-template pTemplate="header">
             <tr>
-                <th style="width: 3rem"></th> <th>Nivel</th>
+                <th style="width: 3rem"></th> 
+                <th>Nivel</th>
                 <th>Nombre</th>
                 <th>Autor</th>
                 <th>Integrantes</th>
@@ -29,9 +28,8 @@
         <ng-template pTemplate="body" let-grupo let-expanded="expanded">
             <tr>
                 <td>
-                    <td>
-                        <p-button type="button" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" [text]="true" [rounded]="true" (onClick)="toggleRow(grupo)"></p-button>
-                    </td>
+                    <p-button type="button" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" [text]="true" [rounded]="true" (onClick)="toggleRow(grupo)"></p-button>
+                </td>
                 <td>{{ grupo.nivel }}</td>
                 <td>{{ grupo.nombre }}</td>
                 <td>{{ grupo.autor }}</td>
@@ -42,15 +40,9 @@
                 </td>
                 <td>
                     <div class="flex gap-2">
-                        @if (authService.tienePermiso(PERMISOS.GROUPS_VER_ESPECIFICO)) {
-                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo()"></p-button>
-                        }
-                        @if (authService.tienePermiso(PERMISOS.GROUPS_EDITAR)) {
-                            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)" [disabled]="!grupo.activo"></p-button>
-                        }
-                        @if (authService.tienePermiso(PERMISOS.GROUPS_BAJA)) {
-                            <p-button icon="pi pi-ban" [rounded]="true" [text]="true" severity="danger" pTooltip="Dar de baja" (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo"></p-button>
-                        }
+                        <p-button *ifHasPermission="['groups:verespecifico']" icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo()"></p-button>
+                        <p-button *ifHasPermission="['groups:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true" pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)" [disabled]="!grupo.activo"></p-button>
+                        <p-button *ifHasPermission="['groups:baja']" icon="pi pi-ban" [rounded]="true" [text]="true" severity="danger" pTooltip="Dar de baja" (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo"></p-button>
                     </div>
                 </td>
             </tr>
@@ -115,7 +107,6 @@
     </p-table>
 </p-card>
 
-<!--Modal-->
 <p-dialog
     [(visible)]="modalVisible"
     [header]="modoEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
@@ -126,7 +117,6 @@
     <form [formGroup]="form">
         <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
 
-            <!--    no sé pq pero el styleclass me sirve para controlar y que se vea bien el input -->
             <p-floatlabel>
                 <input id="nombre" type="text" pInputText formControlName="nombre" class="w-full">
                 <label for="nombre">Nombre</label>

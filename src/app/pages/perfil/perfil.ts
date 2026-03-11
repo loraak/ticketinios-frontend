@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+
 import { AvatarModule } from 'primeng/avatar';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
@@ -16,7 +17,9 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { TableModule } from 'primeng/table';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { AuthService, PERMISOS } from '../../services/auth.service';
+
+import { AuthService } from '../../services/auth.service';
+import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
 
 interface TicketResumen {
     id: number;
@@ -36,6 +39,7 @@ interface TicketResumen {
         ButtonModule, DialogModule, InputTextModule, FloatLabelModule,
         ToastModule, ConfirmDialogModule, TooltipModule,
         InputMaskModule, KeyFilterModule, TableModule,
+        HasPermissionDirective // <-- Agregada para los botones
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './perfil.html',
@@ -43,7 +47,6 @@ interface TicketResumen {
 })
 export class Perfil {
     protected authService = inject(AuthService);
-    protected PERMISOS = PERMISOS;
 
     modalVisible = false;
 
@@ -59,11 +62,11 @@ export class Perfil {
 
     // Tickets asignados al usuario (en producción vendrían del backend)
     ticketsAsignados: TicketResumen[] = [
-        { id: 1, titulo: 'Actualizar dependencias', estado: 'Pendiente',   prioridad: 'Media',  grupo: 'Joestar',   fechaLimite: new Date('2026-03-15') },
-        { id: 2, titulo: 'Crear BD',                estado: 'En Progreso', prioridad: 'Alta',   grupo: 'Joestar',   fechaLimite: new Date('2026-03-20') },
-        { id: 3, titulo: 'Diseñar logo',            estado: 'Hecho',       prioridad: 'Baja',   grupo: 'Stardust',  fechaLimite: new Date('2026-03-05') },
-        { id: 4, titulo: 'Arreglar CORS',           estado: 'Bloqueado',   prioridad: 'Crítica',grupo: 'Diamond',   fechaLimite: new Date('2026-03-10') },
-        { id: 5, titulo: 'Implementar JWT',         estado: 'En Progreso', prioridad: 'Alta',   grupo: 'Passione',  fechaLimite: new Date('2026-03-18') },
+        { id: 1, titulo: 'Actualizar dependencias', estado: 'Pendiente',   prioridad: 'Media',  grupo: 'Joestar',  fechaLimite: new Date('2026-03-15') },
+        { id: 2, titulo: 'Crear BD',                estado: 'En Progreso', prioridad: 'Alta',   grupo: 'Joestar',  fechaLimite: new Date('2026-03-20') },
+        { id: 3, titulo: 'Diseñar logo',            estado: 'Hecho',       prioridad: 'Baja',   grupo: 'Stardust', fechaLimite: new Date('2026-03-05') },
+        { id: 4, titulo: 'Arreglar CORS',           estado: 'Bloqueado',   prioridad: 'Crítica',grupo: 'Diamond',  fechaLimite: new Date('2026-03-10') },
+        { id: 5, titulo: 'Implementar JWT',         estado: 'En Progreso', prioridad: 'Alta',   grupo: 'Passione', fechaLimite: new Date('2026-03-18') },
     ];
 
     get resumen() {

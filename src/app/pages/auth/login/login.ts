@@ -1,14 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { Router } from '@angular/router';
+
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
@@ -48,15 +50,12 @@ export class Login {
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      const ok = this.authService.login(email, password);
+      
+      this.authService.loginSimulado();
 
-      if (ok) {
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Inicio de sesión exitoso.' });
-        setTimeout(() => this.router.navigate(['/app/home']), 1000);
-      } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Email o contraseña incorrectos.' });
-      }
+      this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Inicio de sesión exitoso.' });
+      setTimeout(() => this.router.navigate(['/app/home']), 1000);
+      
     } else {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Por favor, corrija los errores.' });
       this.loginForm.markAllAsTouched();
