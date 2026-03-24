@@ -16,7 +16,7 @@ export const routes: Routes = [
             { path: 'usuarios',   canActivate: [permisoGuard('usuarios:ver')],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
             { path: 'tickets', canActivate: [permisoGuard('tickets:ver')],  loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
             { path: 'groupDetails',   canActivate: [permisoGuard('groups:verespecifico')],   loadComponent: () => import('./pages/group-detail/group-detail').then(m => m.GroupDetail) },
-            { path: 'superadmin', canActivate: [permisoGuard('superadmin:ver')], loadComponent: () => import('./pages/superadmin/superadmin').then(m => m.Superadmin)},
+            { path: 'superadmin', canActivate: [permisoGuard('usuario:ver')], loadComponent: () => import('./pages/superadmin/superadmin').then(m => m.Superadmin)},
         ]
     },
     { path: '**', redirectTo: 'landing' } 

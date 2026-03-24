@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-// PrimeNG Imports
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -101,6 +100,11 @@ export class Usuarios {
     formGrupo: FormGroup;
     modoEdicionGrupo = false; 
 
+    modalAnadirUsuariosVisible = false;
+    grupoDestino: GrupoOpcion | null = null;
+    usuariosDisponibles: UsuarioCrud[] = [];
+    usuariosSeleccionados: string[] = [];
+
     constructor(
         private fb: FormBuilder,
         private messageService: MessageService,
@@ -116,6 +120,27 @@ export class Usuarios {
         this.formGrupo = this.fb.group({
             nombre: ['', Validators.required],
         });
+    }
+
+    abrirModalAnadirUsuarios(grupo: GrupoOpcion) {
+        this.grupoDestino = grupo;
+        this.usuariosDisponibles = this.usuarios.filter(u => !u.grupos.includes(grupo.id));
+        this.usuariosSeleccionados = [];
+        this.modalAnadirUsuariosVisible = true;
+    }
+
+    guardarUsuariosEnGrupo() {
+        if (!this.grupoDestino || !this.usuariosSeleccionados.length) return;
+
+        this.usuarios = this.usuarios.map(u => {
+            if (this.usuariosSeleccionados.includes(u.id)) {
+                return { ...u, grupos: [...u.grupos, this.grupoDestino!.id] };
+            }
+            return u;
+        });
+
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuarios añadidos correctamente.' });
+        this.modalAnadirUsuariosVisible = false;
     }
 
     abrirModalGrupo() {

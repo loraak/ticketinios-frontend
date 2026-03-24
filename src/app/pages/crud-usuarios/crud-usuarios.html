@@ -11,9 +11,6 @@
                 <p-button *ifHasPermission="['groups:crear']" label="Nuevo Grupo" icon="pi pi-plus" severity="secondary"
                     (onClick)="abrirModalGrupo()">
                 </p-button>
-                <p-button *ifHasPermission="['usuarios:crear']" label="Nuevo Usuario" icon="pi pi-plus"
-                    (onClick)="abrirModalNuevo()">
-                </p-button>
             </div>
         </div>
     </ng-template>
@@ -25,6 +22,11 @@
                 <div class="flex align-items-center justify-content-between mb-2">
                     <h3 class="m-0 text-xl font-semibold text-color">{{ grupo.nombre }}</h3>
                     <div class="flex gap-2">
+                        <p-button *ifHasPermission="['groups:agregar']" icon="pi pi-user-plus" [rounded]="true" [text]="true"
+                            severity="success"
+                            pTooltip="Añadir usuarios al grupo"
+                            (onClick)="abrirModalAnadirUsuarios(grupo)">
+                        </p-button>
                         <p-button *ifHasPermission="['groups:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true"
                             pTooltip="Editar grupo"
                             (onClick)="abrirModalEditarGrupo(grupo)">
@@ -254,5 +256,34 @@
         <p-button [label]="modoEdicion ? 'Guardar' : 'Crear'"
             (onClick)="guardarUsuario()">
         </p-button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="modalAnadirUsuariosVisible"
+    [header]="'Añadir Usuarios a ' + (grupoDestino?.nombre || '')"
+    [modal]="true"
+    [style]="{ width: '400px' }"
+    [contentStyle]="{ padding: '1.5rem', overflow: 'visible' }"
+    [draggable]="false">
+    
+    <div style="padding-top: 1.5rem;">
+        <p-floatlabel>
+            <p-multiSelect 
+                inputId="usuariosSelect"
+                [options]="usuariosDisponibles" 
+                [(ngModel)]="usuariosSeleccionados" 
+                optionLabel="nombreCompleto" 
+                optionValue="id"
+                [appendTo]="'body'"
+                styleClass="w-full">
+            </p-multiSelect>
+            <label for="usuariosSelect">Seleccionar Usuarios</label>
+        </p-floatlabel>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="modalAnadirUsuariosVisible = false"></p-button>
+        <p-button label="Añadir" (onClick)="guardarUsuariosEnGrupo()" [disabled]="!usuariosSeleccionados.length"></p-button>
     </ng-template>
 </p-dialog>

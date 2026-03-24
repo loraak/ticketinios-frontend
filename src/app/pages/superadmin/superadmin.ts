@@ -45,9 +45,9 @@ export const PERMISOS_LEGIBLES: PermisoLegible[] = [
     { permiso: 'groups:baja',             label: 'Dar de baja grupos',           grupo: 'Grupos'           },
     // Grupos detalle
     { permiso: 'groups:verespecifico',    label: 'Ver grupo específico',         grupo: 'Grupos — Detalle' },
-    { permiso: 'groups:detail:crear',     label: 'Agregar miembros al grupo',    grupo: 'Grupos — Detalle' },
-    { permiso: 'groups:detail:editar',    label: 'Editar miembros del grupo',    grupo: 'Grupos — Detalle' },
-    { permiso: 'groups:detail:baja',      label: 'Eliminar miembros del grupo',  grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:crear',     label: 'Agregar miembros al grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:editar',    label: 'Editar miembros del grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:baja',      label: 'Eliminar miembros del grupo',  grupo: 'Grupos — Detalle' },
     { permiso: 'groups:mistickets',       label: 'Ver mis tickets del grupo',    grupo: 'Grupos — Detalle' },
     // Usuarios
     { permiso: 'usuarios:ver',            label: 'Ver usuarios',                 grupo: 'Usuarios'         },
@@ -60,12 +60,7 @@ export const PERMISOS_LEGIBLES: PermisoLegible[] = [
     { permiso: 'tickets:admin',           label: 'Administrar tickets',          grupo: 'Tickets'          },
     { permiso: 'tickets:editar',          label: 'Editar tickets',               grupo: 'Tickets'          },
     { permiso: 'tickets:eliminar',        label: 'Eliminar tickets',             grupo: 'Tickets'          },
-    { permiso: 'tickets:detalle',         label: 'Ver detalle de tickets',       grupo: 'Tickets'          },
-    // Superadmin
-    { permiso: 'superadmin:ver',          label: 'Ver panel superadmin',         grupo: 'Superadmin'       },
-    { permiso: 'superadmin:crear',        label: 'Crear en superadmin',          grupo: 'Superadmin'       },
-    { permiso: 'superadmin:editar',       label: 'Editar en superadmin',         grupo: 'Superadmin'       },
-    { permiso: 'superadmin:baja',         label: 'Dar de baja en superadmin',    grupo: 'Superadmin'       },
+    { permiso: 'tickets:detalle',         label: 'Ver detalle de tickets',       grupo: 'Tickets'          }
 ];
 
 @Component({
@@ -99,7 +94,7 @@ export class Superadmin {
             password: '123', activo: true,
             permisos: [
                 'perfil:editar', 'perfil:baja', 'groups:admin', 'groups:ver', 'groups:crear', 'groups:editar', 'groups:baja',
-                'groups:verespecifico', 'groups:detail:crear', 'groups:detail:editar', 'groups:detail:baja',
+                'groups:verespecifico', 'ticket:crear', 'ticket:editar', 'ticket:baja',
                 'usuarios:ver', 'usuarios:crear', 'usuarios:editar', 'usuarios:baja',
                 'tickets:admin', 'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle'
             ]
@@ -109,7 +104,7 @@ export class Superadmin {
             password: '123', activo: true,
             permisos: [
                 'perfil:editar', 'groups:ver', 'groups:verespecifico', 'groups:crear',
-                'groups:detail:crear', 'groups:detail:editar', 'groups:detail:baja', 'groups:mistickets',
+                'ticket:crear', 'ticket:editar', 'ticket:baja', 'groups:mistickets',
                 'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle'
             ]
         },

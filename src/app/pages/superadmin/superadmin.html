@@ -6,10 +6,10 @@
         <div class="flex justify-content-between align-items-center px-4 pt-3">
             <div>
                 <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">
-                Panel de Permisos
+                Panel de Usuarios
                 </h2>
             </div>
-            <p-button *ifHasPermission="['superadmin:crear']" label="Nuevo Usuario" icon="pi pi-plus" (onClick)="abrirNuevo()"></p-button>
+            <p-button *ifHasPermission="['usuario:crear']" label="Nuevo Usuario" icon="pi pi-plus" (onClick)="abrirNuevo()"></p-button>
         </div>
     </ng-template>
 
@@ -40,19 +40,19 @@
                 <td>
                     <div class="flex gap-1">
                         <p-button icon="pi pi-shield" [rounded]="true" [text]="true"
-                            *ifHasPermission="['superadmin:gestionarpermisos']"
+                            *ifHasPermission="['usuario:gestionarpermisos']"
                             pTooltip="Gestionar permisos"
                             severity="info"
                             (onClick)="abrirPermisos(usuario)">
                         </p-button>
                         <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                            *ifHasPermission="['superadmin:editar']"
+                            *ifHasPermission="['usuario:editar']"
                             pTooltip="Editar usuario"
                             (onClick)="abrirEditar(usuario)"
                             [disabled]="!usuario.activo">
                         </p-button>
                         <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                            *ifHasPermission="['superadmin:baja']"
+                            *ifHasPermission="['usuario:baja']"
                             severity="danger"
                             pTooltip="Dar de baja"
                             (onClick)="confirmarBaja(usuario)"

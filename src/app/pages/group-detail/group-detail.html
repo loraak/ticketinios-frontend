@@ -32,7 +32,7 @@
                 <p-button [outlined]="vistaActual !== 'tabla'" icon="pi pi-list" (onClick)="vistaActual = 'tabla'"></p-button>
             </div>
         </div>
-        <p-button *ifHasPermission="['groups:detail:crear']" label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
+        <p-button *ifHasPermission="['ticket:crear']" label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()"></p-button>
     </div>
 
     @if (vistaActual === 'kanban') {
@@ -53,11 +53,10 @@
                                 (onDragStart)="dragStart(ticket)" 
                                 (onDragEnd)="dragEnd()"
                                 (click)="editarTicket(ticket)">
-                                                                                
                                 <div class="flex justify-content-between align-items-start mb-2">
                                     <div class="font-medium text-color">{{ ticket.titulo }}</div>
                                     <div class="flex gap-1">
-                                        <p-button *ifHasPermission="['groups:detail:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
+                                        <p-button *ifHasPermission="['ticket:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
                                     </div>
                                 </div>
 
@@ -142,7 +141,7 @@
                         <td>{{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</td>
                         <td class="text-center">
                             @if (esCreador(ticket)) {
-                                <p-button *ifHasPermission="['groups:detail:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
+                                <p-button *ifHasPermission="['ticket:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
                             }
                         </td>
                     </tr>
@@ -226,11 +225,11 @@
         <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="modalVisible = false"></p-button>
         
         @if (modoEdicion && ticketSeleccionado && esCreador(ticketSeleccionado)) {
-            <p-button *ifHasPermission="['groups:detail:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" (onClick)="eliminarTicket(ticketSeleccionado)"></p-button>
+            <p-button *ifHasPermission="['ticket:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" (onClick)="eliminarTicket(ticketSeleccionado)"></p-button>
         }
         
         @if (form.enabled) {
-            <p-button *ifHasPermission="['groups:detail:editar']" label="Guardar" (onClick)="guardarTicket()" [disabled]="form.invalid"></p-button>
+            <p-button *ifHasPermission="['ticket:editar']" label="Guardar" (onClick)="guardarTicket()" [disabled]="form.invalid"></p-button>
         }
     </ng-template>
 </p-dialog>
