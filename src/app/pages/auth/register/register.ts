@@ -101,6 +101,7 @@ export function adultAgeValidator(): ValidatorFn {
 })
 export class Register implements OnInit {
   registerForm!: FormGroup;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -132,7 +133,7 @@ export class Register implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
+    if (this.registerForm.invalid || this.loading) {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -142,11 +143,13 @@ export class Register implements OnInit {
       return;
     }
 
+    this.loading = true;
     // Excluimos confirmPassword que no se necesita en el backend
     const { confirmPassword, ...payload } = this.registerForm.getRawValue();
 
     this.http.post('http://localhost:8081/api/auth/register', payload).subscribe({
       next: () => {
+        this.loading = false;
         this.messageService.add({
           severity: 'success',
           summary: 'Registro Exitoso',
@@ -155,6 +158,7 @@ export class Register implements OnInit {
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (err) => {
+        this.loading = false;
         this.messageService.add({
           severity: 'error',
           summary: 'Error en el Registro',

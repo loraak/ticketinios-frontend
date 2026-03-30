@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -16,13 +16,13 @@ import { PasswordModule } from 'primeng/password';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
-import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { UsuarioService } from '../../services/usuario.service';
 
 export interface UsuarioAdmin {
     id: string;
     nombreCompleto: string;
     email: string;
-    password: string;
     permisos: string[];
     activo: boolean;
 }
@@ -34,27 +34,22 @@ export interface PermisoLegible {
 }
 
 export const PERMISOS_LEGIBLES: PermisoLegible[] = [
-    // Perfil
     { permiso: 'perfil:editar',           label: 'Editar perfil',                grupo: 'Perfil'           },
     { permiso: 'perfil:baja',             label: 'Dar de baja perfil',           grupo: 'Perfil'           },
-    // Grupos CRUD
     { permiso: 'groups:admin',            label: 'Administrar grupos',           grupo: 'Grupos'           },
     { permiso: 'groups:ver',              label: 'Ver grupos',                   grupo: 'Grupos'           },
     { permiso: 'groups:crear',            label: 'Crear grupos',                 grupo: 'Grupos'           },
     { permiso: 'groups:editar',           label: 'Editar grupos',                grupo: 'Grupos'           },
     { permiso: 'groups:baja',             label: 'Dar de baja grupos',           grupo: 'Grupos'           },
-    // Grupos detalle
     { permiso: 'groups:verespecifico',    label: 'Ver grupo específico',         grupo: 'Grupos — Detalle' },
-    { permiso: 'ticket:crear',     label: 'Agregar miembros al grupo',    grupo: 'Grupos — Detalle' },
-    { permiso: 'ticket:editar',    label: 'Editar miembros del grupo',    grupo: 'Grupos — Detalle' },
-    { permiso: 'ticket:baja',      label: 'Eliminar miembros del grupo',  grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:crear',            label: 'Agregar miembros al grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:editar',           label: 'Editar miembros del grupo',    grupo: 'Grupos — Detalle' },
+    { permiso: 'ticket:baja',             label: 'Eliminar miembros del grupo',  grupo: 'Grupos — Detalle' },
     { permiso: 'groups:mistickets',       label: 'Ver mis tickets del grupo',    grupo: 'Grupos — Detalle' },
-    // Usuarios
     { permiso: 'usuarios:ver',            label: 'Ver usuarios',                 grupo: 'Usuarios'         },
     { permiso: 'usuarios:crear',          label: 'Crear usuarios',               grupo: 'Usuarios'         },
     { permiso: 'usuarios:editar',         label: 'Editar usuarios',              grupo: 'Usuarios'         },
     { permiso: 'usuarios:baja',           label: 'Dar de baja usuarios',         grupo: 'Usuarios'         },
-    // Tickets
     { permiso: 'tickets:ver',             label: 'Ver tickets',                  grupo: 'Tickets'          },
     { permiso: 'tickets:agregar',         label: 'Crear tickets',                grupo: 'Tickets'          },
     { permiso: 'tickets:admin',           label: 'Administrar tickets',          grupo: 'Tickets'          },
@@ -77,43 +72,12 @@ export const PERMISOS_LEGIBLES: PermisoLegible[] = [
     templateUrl: './superadmin.html',
     styleUrl: './superadmin.css'
 })
-export class Superadmin {
+export class Superadmin implements OnInit {
     protected PERMISOS_LEGIBLES = PERMISOS_LEGIBLES;
 
-    get gruposPermisos(): string[] {
-        return [...new Set(PERMISOS_LEGIBLES.map(p => p.grupo))];
-    }
+    private usuarioSvc = inject(UsuarioService);
 
-    permisosPorGrupo(grupo: string): PermisoLegible[] {
-        return PERMISOS_LEGIBLES.filter(p => p.grupo === grupo);
-    }
-
-    usuarios: UsuarioAdmin[] = [
-        {
-            id: '1', nombreCompleto: 'Jonathan Joestar', email: 'jonathan@gmail.com',
-            password: '123', activo: true,
-            permisos: [
-                'perfil:editar', 'perfil:baja', 'groups:admin', 'groups:ver', 'groups:crear', 'groups:editar', 'groups:baja',
-                'groups:verespecifico', 'ticket:crear', 'ticket:editar', 'ticket:baja',
-                'usuarios:ver', 'usuarios:crear', 'usuarios:editar', 'usuarios:baja',
-                'tickets:admin', 'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle'
-            ]
-        },
-        {
-            id: '2', nombreCompleto: 'Giorno Giovanna', email: 'giorno@gmail.com',
-            password: '123', activo: true,
-            permisos: [
-                'perfil:editar', 'groups:ver', 'groups:verespecifico', 'groups:crear',
-                'ticket:crear', 'ticket:editar', 'ticket:baja', 'groups:mistickets',
-                'tickets:ver', 'tickets:agregar', 'tickets:editar', 'tickets:eliminar', 'tickets:detalle'
-            ]
-        },
-        {
-            id: '3', nombreCompleto: 'Dio Brando', email: 'dio@gmail.com',
-            password: '123', activo: true,
-            permisos: PERMISOS_LEGIBLES.map(p => p.permiso),
-        },
-    ];
+    usuarios: UsuarioAdmin[] = [];
 
     modalPermisosVisible = false;
     usuarioSeleccionado: UsuarioAdmin | null = null;
@@ -130,11 +94,36 @@ export class Superadmin {
         private confirmationService: ConfirmationService
     ) {
         this.form = this.fb.group({
+            usuario:        ['', Validators.required],
             nombreCompleto: ['', Validators.required],
             email:          ['', [Validators.required, Validators.email]],
             password:       ['', Validators.required],
+            direccion:      ['', Validators.required],
+            fechaNacimiento:['', Validators.required],
+            telefono:       ['', Validators.required],
         });
     }
+
+    ngOnInit() {
+        this.cargarUsuarios();
+    }
+
+    cargarUsuarios() {
+        this.usuarioSvc.listar().subscribe({
+            next: (data) => this.usuarios = data,
+            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los usuarios.' })
+        });
+    }
+
+    get gruposPermisos(): string[] {
+        return [...new Set(PERMISOS_LEGIBLES.map(p => p.grupo))];
+    }
+
+    permisosPorGrupo(grupo: string): PermisoLegible[] {
+        return PERMISOS_LEGIBLES.filter(p => p.grupo === grupo);
+    }
+
+    // — Permisos —
 
     abrirPermisos(usuario: UsuarioAdmin) {
         this.usuarioSeleccionado = usuario;
@@ -177,12 +166,19 @@ export class Superadmin {
     }
 
     guardarPermisos() {
-        const idx = this.usuarios.findIndex(u => u.id === this.usuarioSeleccionado!.id);
-        this.usuarios[idx] = { ...this.usuarios[idx], permisos: [...this.permisosSeleccionados] };
-        this.usuarios = [...this.usuarios];
-        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Permisos actualizados.' });
-        this.modalPermisosVisible = false;
+        this.usuarioSvc.actualizarPermisos(this.usuarioSeleccionado!.id, this.permisosSeleccionados).subscribe({
+            next: () => {
+                const idx = this.usuarios.findIndex(u => u.id === this.usuarioSeleccionado!.id);
+                this.usuarios[idx] = { ...this.usuarios[idx], permisos: [...this.permisosSeleccionados] };
+                this.usuarios = [...this.usuarios];
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Permisos actualizados.' });
+                this.modalPermisosVisible = false;
+            },
+            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudieron actualizar los permisos.' })
+        });
     }
+
+    // — Usuarios —
 
     abrirNuevo() {
         this.modoEdicion = false;
@@ -207,26 +203,26 @@ export class Superadmin {
             this.form.markAllAsTouched();
             return;
         }
+
         if (this.modoEdicion && this.usuarioEnEdicion) {
-            const valores = this.form.value;
-            const idx = this.usuarios.findIndex(u => u.id === this.usuarioEnEdicion!.id);
-            this.usuarios[idx] = {
-                ...this.usuarioEnEdicion,
-                ...valores,
-                password: valores.password || this.usuarioEnEdicion.password,
-            };
-            this.usuarios = [...this.usuarios];
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado.' });
+            this.usuarioSvc.editar(this.usuarioEnEdicion.id, this.form.value).subscribe({
+                next: () => {
+                    this.cargarUsuarios();
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado.' });
+                    this.modalUsuarioVisible = false;
+                },
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al actualizar.' })
+            });
         } else {
-            this.usuarios = [...this.usuarios, {
-                id: crypto.randomUUID(),
-                ...this.form.value,
-                permisos: [],
-                activo: true,
-            }];
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado.' });
+            this.usuarioSvc.crear(this.form.value).subscribe({
+                next: () => {
+                    this.cargarUsuarios();
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado.' });
+                    this.modalUsuarioVisible = false;
+                },
+                error: (err) => this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear.' })
+            });
         }
-        this.modalUsuarioVisible = false;
     }
 
     confirmarBaja(usuario: UsuarioAdmin) {
@@ -239,10 +235,13 @@ export class Superadmin {
             acceptButtonProps: { severity: 'danger' },
             rejectButtonProps: { severity: 'secondary', text: true },
             accept: () => {
-                const idx = this.usuarios.findIndex(u => u.id === usuario.id);
-                this.usuarios[idx] = { ...this.usuarios[idx], activo: false };
-                this.usuarios = [...this.usuarios];
-                this.messageService.add({ severity: 'warn', summary: 'Baja', detail: `"${usuario.nombreCompleto}" dado de baja.` });
+                this.usuarioSvc.darDeBaja(usuario.id).subscribe({
+                    next: () => {
+                        this.cargarUsuarios();
+                        this.messageService.add({ severity: 'warn', summary: 'Baja', detail: `"${usuario.nombreCompleto}" dado de baja.` });
+                    },
+                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo dar de baja.' })
+                });
             }
         });
     }

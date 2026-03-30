@@ -12,7 +12,7 @@ export const routes: Routes = [
         children: [
             { path: '',       redirectTo: 'home', pathMatch: 'full' }, 
             { path: 'perfil', loadComponent: () => import('./pages/perfil/perfil').then(m => m.Perfil) },
-            { path: 'home',   canActivate: [permisoGuard('groups:ver')],   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
+            { path: 'home',   loadComponent: () => import('./pages/crud/crud').then(m => m.Groups) },
             { path: 'usuarios',   canActivate: [permisoGuard('usuarios:ver')],   loadComponent: () => import('./pages/crud-usuarios/crud-usuarios').then(m => m.Usuarios) },
             { path: 'tickets', canActivate: [permisoGuard('tickets:ver')],  loadComponent: () => import('./pages/tickets/tickets').then(m => m.Tickets) },
             { path: 'groupDetails',   canActivate: [permisoGuard('groups:verespecifico')],   loadComponent: () => import('./pages/group-detail/group-detail').then(m => m.GroupDetail) },

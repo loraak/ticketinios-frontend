@@ -150,7 +150,8 @@
                         label="Registrarse"
                         type="submit"
                         styleClass="w-full mt-3"
-                        [disabled]="registerForm.invalid">
+                        [loading]="loading"
+                        [disabled]="registerForm.invalid || loading">
                     </p-button>
                 </div>
             </ng-template>
