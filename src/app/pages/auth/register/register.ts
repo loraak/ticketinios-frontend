@@ -120,7 +120,7 @@ export class Register implements OnInit {
         confirmPassword: ['', Validators.required],
         direccion:       ['', Validators.required],
         fechaNacimiento: ['', [Validators.required, adultAgeValidator()]],
-        telefono:        ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
+        telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
       },
       {
         validators: passwordMatchValidator('password', 'confirmPassword')
@@ -144,10 +144,9 @@ export class Register implements OnInit {
     }
 
     this.loading = true;
-    // Excluimos confirmPassword que no se necesita en el backend
     const { confirmPassword, ...payload } = this.registerForm.getRawValue();
 
-    this.http.post('http://localhost:8081/api/auth/register', payload).subscribe({
+    this.http.post('http://localhost:3000/api/auth/register', payload).subscribe({
       next: () => {
         this.loading = false;
         this.messageService.add({
@@ -162,7 +161,7 @@ export class Register implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Error en el Registro',
-          detail: err.error?.message || 'Ocurrió un error inesperado. Por favor, inténtelo de nuevo.'
+          detail: err.error?.data?.[0]?.message || 'Ocurrió un error inesperado.'
         });
       }
     });

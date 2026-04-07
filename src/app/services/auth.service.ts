@@ -15,38 +15,23 @@ export class AuthService {
     readonly estaLogueado = computed(() => this._usuario() !== null);
 
     login(email: string, password: string): Observable<any> {
-    return this.http.post('http://localhost:8081/api/auth/login',
+    return this.http.post('http://localhost:3000/api/auth/login',
         { email, password },
         { withCredentials: true }
     ).pipe(
         tap((response: any) => {
         const usuario = response.data[0].usuario; 
-        console.log('Permisos recibidos:', usuario.permisos); 
+        const token = usuario.token; 
+        this.tokenSvc.setToken(token);
         this._usuario.set(usuario);
         this.permsSvc.setPermissions(usuario.permisos || []);
     })
     );
     }
 
-    cargarSesion() {
-        this.procesarToken();
-    }
-
     logout() {
         localStorage.removeItem('jwt');
         this.permsSvc.setPermissions([]);
         this._usuario.set(null);
-    }
-
-    private procesarToken() {
-        const payload = this.tokenSvc.getDecodedPayload();
-        if (payload) {
-            this.permsSvc.setPermissions(payload.permisos || []); 
-            this._usuario.set({ 
-                id: payload.id, 
-                nombreCompleto: payload.nombreCompleto, 
-                email: payload.email 
-            });
-        }
     }
 }

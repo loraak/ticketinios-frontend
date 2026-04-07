@@ -6,15 +6,15 @@
             <ng-template pTemplate="header">
                 <div class="text-center pt-4 pb-2 px-4">
                     <h2 style="margin: 0.5rem 0 0.25rem; font-size: 1.5rem; font-weight: 700; color: var(--text-color);">
-                        Registro de Usuario
+                        Registro
                     </h2>
                     <p style="margin: 0; color: #94a3b8; font-size: 0.875rem;">
-                        Completa el formulario para crear tu cuenta
+                        Completa el formulario para crear tu cuenta :) 
                     </p>
                 </div>
             </ng-template>
 
-            <div class="px-3" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="px-3 mt-2" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
                 <div>
                     <p-floatlabel>
@@ -22,7 +22,7 @@
                         <label for="usuario">Nombre de Usuario</label>
                     </p-floatlabel>
                     @if (f['usuario'].touched && f['usuario'].errors?.['required']) {
-                        <small class="p-error block mt-1">El nombre de usuario es requerido.</small>
+                        <small class="p-error block mt-2">El nombre de usuario es requerido.</small>
                     }
                 </div>
 
@@ -32,7 +32,7 @@
                         <label for="nombreCompleto">Nombre Completo</label>
                     </p-floatlabel>
                     @if (f['nombreCompleto'].touched && f['nombreCompleto'].errors?.['required']) {
-                        <small class="p-error block mt-1">El nombre completo es requerido.</small>
+                        <small class="p-error block mt-2">El nombre completo es requerido.</small>
                     }
                 </div>
 
@@ -43,10 +43,10 @@
                     </p-floatlabel>
                     @if (f['email'].touched && f['email'].errors) {
                         @if (f['email'].errors['required']) {
-                            <small class="p-error block mt-1">El email es requerido.</small>
+                            <small class="p-error block mt-2">El email es requerido.</small>
                         }
                         @if (f['email'].errors['email']) {
-                            <small class="p-error block">Formato de email inválido.</small>
+                            <small class="p-error block mt-2">Formato de email inválido.</small>
                         }
                     }
                 </div>
@@ -65,10 +65,10 @@
                     </p-floatlabel>
                     @if (f['password'].touched && f['password'].errors) {
                         @if (f['password'].errors['required']) {
-                            <small class="p-error block mt-1">La contraseña es requerida.</small>
+                            <small class="p-error block mt-2">La contraseña es requerida.</small>
                         }
                         @if (f['password'].errors['passwordStrength']) {
-                            <small class="p-error block">Mínimo 10 caracteres y un símbolo especial (!@#$...).</small>
+                            <small class="p-error block mt-2">Mínimo 10 caracteres y un símbolo especial (!@#$...).</small>
                         }
                     }
                 </div>
@@ -87,10 +87,10 @@
                     </p-floatlabel>
                     @if (f['confirmPassword'].touched && f['confirmPassword'].errors) {
                         @if (f['confirmPassword'].errors['required']) {
-                            <small class="p-error block mt-1">La confirmación de contraseña es requerida.</small>
+                            <small class="p-error block mt-2">La confirmación de contraseña es requerida.</small>
                         }
                         @if (f['confirmPassword'].errors['passwordMismatch']) {
-                            <small class="p-error block">Las contraseñas no coinciden.</small>
+                            <small class="p-error block mt-2">Las contraseñas no coinciden.</small>
                         }
                     }
                 </div>
@@ -101,12 +101,11 @@
                         <label for="direccion">Dirección</label>
                     </p-floatlabel>
                     @if (f['direccion'].touched && f['direccion'].errors?.['required']) {
-                        <small class="p-error block mt-1">La dirección es requerida.</small>
+                        <small class="p-error block mt-2">La dirección es requerida.</small>
                     }
                 </div>
 
                 <div>
-                    <p-floatlabel>
                         <p-inputmask
                             inputId="fechaNacimiento"
                             formControlName="fechaNacimiento"
@@ -115,14 +114,12 @@
                             styleClass="w-full"
                             inputStyleClass="w-full">
                         </p-inputmask>
-                        <label for="fechaNacimiento">Fecha de Nacimiento</label>
-                    </p-floatlabel>
                     @if (f['fechaNacimiento'].touched && f['fechaNacimiento'].errors) {
                         @if (f['fechaNacimiento'].errors['required']) {
-                            <small class="p-error block mt-1">La fecha de nacimiento es requerida.</small>
+                            <small class="p-error block mt-2">La fecha de nacimiento es requerida.</small>
                         }
                         @if (f['fechaNacimiento'].errors['notAdult']) {
-                            <small class="p-error block">Debe ser mayor de 18 años.</small>
+                            <small class="p-error block mt-2">Debe ser mayor de 18 años.</small>
                         }
                     }
                 </div>
@@ -134,10 +131,10 @@
                     </p-floatlabel>
                     @if (f['telefono'].touched && f['telefono'].errors) {
                         @if (f['telefono'].errors['required']) {
-                            <small class="p-error block mt-1">El número de teléfono es requerido.</small>
+                            <small class="p-error block mt-2">El número de teléfono es requerido.</small>
                         }
                         @if (f['telefono'].errors['pattern']) {
-                            <small class="p-error block">Solo se permiten números.</small>
+                            <small class="p-error block mt-2">El teléfono debe tener exactamente 10 dígitos.</small>
                         }
                     }
                 </div>
