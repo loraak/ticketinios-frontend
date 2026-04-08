@@ -5,7 +5,7 @@
         <div class="text-center mb-4">
             <p-avatar image="/mista.jpg" size="xlarge" shape="circle"></p-avatar>
             <p class="m-0 mt-2 text-sm text-color-secondary">
-                {{ authService.usuario()?.email }}
+                {{authService.usuario()?.username}}
             </p>
         </div>
 
@@ -23,21 +23,6 @@
                 class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                 <i class="pi pi-users"></i> Gestión de grupos
             </a>
-            
-            <!--
-            <a *ifHasPermission="['groups:ver']" routerLink="/app/crud" routerLinkActive="font-bold text-primary"
-                class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
-                <i class="pi pi-table"></i> Grupos
-            </a>
-            -->
-            
-            <!--
-            <a *ifHasPermission="['tickets:ver']" routerLink="/app/tickets" routerLinkActive="font-bold text-primary"
-                class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
-                <i class="pi pi-ticket"></i> Tickets
-            </a>
-            -->
-            
             <a *ifHasPermission="['usuario:ver']" routerLink="/app/superadmin" routerLinkActive="font-bold text-primary"
                 class="flex align-items-center gap-3 p-3 border-round text-color no-underline cursor-pointer transition-colors transition-duration-150">
                 <i class="pi pi-ticket"></i> Usuarios
