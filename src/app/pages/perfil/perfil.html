@@ -11,8 +11,8 @@
                     <h2 class="m-0 mb-1 text-2xl font-bold text-color">{{ authService.usuario()?.nombreCompleto}}</h2>
                     <p class="m-0 mb-2 text-color-secondary">{{ authService.usuario()?.email }}</p>
                     <p-tag
-                        [value]="usuario.activo ? 'Activo' : 'Baja'"
-                        [severity]="usuario.activo ? 'success' : 'danger'">
+                        [value]="usuario().activo ? 'Activo' : 'Baja'"
+                        [severity]="usuario().activo ? 'success' : 'danger'">
                     </p-tag>
                 </div>
             </div>
@@ -21,13 +21,13 @@
                     *ifHasPermission="['perfil:editar']"
                     pTooltip="Editar perfil"
                     (onClick)="abrirEditar()"
-                    [disabled]="!usuario.activo">
+                    [disabled]="!usuario().activo">
                 </p-button>
                 <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
                     *ifHasPermission="['perfil:eliminar']"
                     severity="danger" pTooltip="Dar de baja"
                     (onClick)="confirmarBaja()"
-                    [disabled]="!usuario.activo">
+                    [disabled]="!usuario().activo">
                 </p-button>
             </div>
         </div>
@@ -167,6 +167,6 @@
 
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="modalVisible = false"></p-button>
-        <p-button label="Guardar Cambios" (onClick)="guardar()"></p-button>
+        <p-button label="Guardar" (onClick)="guardar()"></p-button>
     </ng-template>
 </p-dialog>

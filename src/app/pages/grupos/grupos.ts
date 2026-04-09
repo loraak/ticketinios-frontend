@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router'; 
@@ -20,6 +20,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { PermissionsService } from '../../services/permissions.service'; 
 import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectorRef } from '@angular/core'
 
 interface Group {
     id: number;
@@ -45,27 +47,36 @@ interface Group {
     templateUrl: './grupos.html',
     styleUrl: './grupos.css'
 })
-export class Grupos {
+
+export class Grupos implements OnInit {
+    private cdr = inject(ChangeDetectorRef);
     protected authService = inject(AuthService);
     protected permissionsSvc = inject(PermissionsService); 
     protected router = inject(Router); 
+    private http = inject(HttpClient);
+    private messageService = inject(MessageService);
+    private confirmationService = inject(ConfirmationService);
 
-    grupos: Group[] = [
-        { id: 1, autor: 'Jonathan Joestar', nombre: 'Phantom Blood', integrantes: 3, tickets: 5,  activo: true },
-        { id: 2, autor: 'Giorno Giovanna', nombre: 'Golden Experience', integrantes: 7, tickets: 5, activo: true },
-        { id: 3, autor: 'Giorno Giovanna', nombre: 'El Padrino', integrantes: 2, tickets: 1, activo: false },
-        { id: 4, autor: 'Giorno Giovanna', nombre: 'Réquiem', integrantes: 2, tickets: 2, activo: true },
-        { id: 5, autor: 'Jotaro Joestar', nombre: 'Star Dust', integrantes: 5, tickets: 3, activo: false },
-        { id: 6, autor: 'Jolyne Joestar', nombre: 'Stone Ocean', integrantes: 6, tickets: 4, activo: true },
-    ];
+    grupos: Group[] = [];
+    loading = false; 
 
-    get gruposVisibles() {
-        if (this.permissionsSvc.hasPermission('Grupos:admin')) {
-            return this.grupos;
-        }
-        
-        const nombreUsuario = (this.authService.usuario() as any)?.nombreCompleto;
-        return this.grupos.filter(g => g.autor === nombreUsuario);
+    ngOnInit() {
+        this.cargarGrupos();
+    }
+
+    cargarGrupos() { 
+        this.loading = true;
+        this.http.get<any>('http://localhost:3000/api/grupos').subscribe({
+            next: (res) => {
+                this.grupos = res.data;
+                this.loading = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.loading = false;
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     modalVisible = false;
@@ -75,14 +86,11 @@ export class Grupos {
 
     constructor(
         private fb: FormBuilder,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService
     ) {
         this.form = this.fb.group({
-            autor:       ['', Validators.required],
+            creador:       ['', Validators.required],
             nombre:      ['', Validators.required],
             integrantes: [null, Validators.required],
-            tickets:     [null, Validators.required],
             descripcion: ['', Validators.required]
         });
     }
@@ -96,7 +104,7 @@ export class Grupos {
     abrirModalEditar(grupo: Group) {
         this.modoEdicion = true;
         this.grupoSeleccionado = grupo;
-        this.form.patchValue(grupo);
+        this.form.patchValue(grupo);    
         this.modalVisible = true;
     }
 
@@ -105,17 +113,48 @@ export class Grupos {
             this.form.markAllAsTouched();
             return;
         }
-
+    
         if (this.modoEdicion && this.grupoSeleccionado) {
-            const idx = this.grupos.findIndex(g => g.id === this.grupoSeleccionado!.id);
-            this.grupos[idx] = { ...this.grupoSeleccionado, ...this.form.value };
-            this.grupos = [...this.grupos];
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo actualizado.' });
+            this.http.put<any>(
+                `http://localhost:3000/api/grupos/${this.grupoSeleccionado.id}`,
+                this.form.value
+            ).subscribe({
+                next: (res) => {
+                    const actualizado = res.data[0];
+                    this.grupos = this.grupos.map(g =>
+                        g.id === actualizado.id ? actualizado : g
+                    );
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo actualizado.' });
+                    this.modalVisible = false;
+                },
+                error: (err) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.data?.[0]?.message || 'Error inesperado.'
+                    });
+                }
+            });
         } else {
-            this.grupos = [...this.grupos, { id: Date.now(), ...this.form.value, activo: true }];
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo creado.' });
+            this.http.post<any>('http://localhost:3000/api/grupos', {
+                ...this.form.value,
+                creadorId:     this.authService.usuario()?.sub,
+                creadorNombre: this.authService.usuario()?.nombreCompleto
+            }).subscribe({
+                next: (res) => {
+                    this.grupos = [...this.grupos, res.data[0]];
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo creado.' });
+                    this.modalVisible = false;
+                },
+                error: (err) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.data?.[0]?.message || 'Error inesperado.'
+                    });
+                }
+            });
         }
-        this.modalVisible = false;
     }
 
     ingresarGrupo() { 

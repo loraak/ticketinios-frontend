@@ -7,17 +7,17 @@
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">
                 Grupos
             </h2>
-            <p-button *ifHasPermission="['groups:crear']" label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
+            <p-button *ifHasPermission="['grupos:crear']" label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
         </div>
     </ng-template>
 
-    <p-table [value]="gruposVisibles" [paginator]="true" [rows]="5" dataKey="id">
+    <p-table [value]="grupos" [paginator]="true" [rows]="5" dataKey="id">
         <ng-template pTemplate="header">
             <tr>
-                <th>Nombre</th>
-                <th>Autor</th>
-                <th>Integrantes</th>
-                <th>Tickets</th>
+                <th>Nombre del grupo</th>
+                <th>Creador</th>
+                <th>Descripción</th>
+                <th>Número de integrantes</th>
                 <th>Estado</th>
                 <th style="width: 12rem;">Acciones</th>
             </tr>
@@ -26,17 +26,17 @@
         <ng-template pTemplate="body" let-grupo let-expanded="expanded">
             <tr>
                 <td>{{ grupo.nombre }}</td>
-                <td>{{ grupo.autor }}</td>
+                <td>{{ grupo.creador }}</td>
+                <td>{{ grupo.descripcion }}</td>
                 <td>{{ grupo.integrantes }}</td>
-                <td>{{ grupo.tickets }}</td>
                 <td>
                     <p-tag [value]="grupo.activo ? 'Activo' : 'Baja'" [severity]="grupo.activo ? 'success' : 'danger'"></p-tag>
                 </td>
                 <td>
                     <div class="flex gap-2">
-                        <p-button *ifHasPermission="['groups:verespecifico']" icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo()"></p-button>
-                        <p-button *ifHasPermission="['groups:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true" pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)" [disabled]="!grupo.activo"></p-button>
-                        <p-button *ifHasPermission="['groups:baja']" icon="pi pi-ban" [rounded]="true" [text]="true" severity="danger" pTooltip="Dar de baja" (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo"></p-button>
+                        <p-button *ifHasPermission="['grupos:ver_especifico']" icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo()"></p-button>
+                        <p-button *ifHasPermission="['grupos:editar']" icon="pi pi-pencil" [rounded]="true" [text]="true" pTooltip="Editar grupo" (onClick)="abrirModalEditar(grupo)" [disabled]="!grupo.activo"></p-button>
+                        <p-button *ifHasPermission="['grupos:eliminar']" icon="pi pi-ban" [rounded]="true" [text]="true" severity="danger" pTooltip="Dar de baja" (onClick)="confirmarBaja(grupo)" [disabled]="!grupo.activo"></p-button>
                     </div>
                 </td>
             </tr>
@@ -59,38 +59,20 @@
 
     <form [formGroup]="form">
         <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
-
-            <p-floatlabel>
+            <p-floatlabel class="w-full mt-2">
                 <input id="nombre" type="text" pInputText formControlName="nombre" class="w-full">
                 <label for="nombre">Nombre</label>
             </p-floatlabel>
-
-            <p-floatlabel>
-                <input id="autor" type="text" pInputText formControlName="autor" class="w-full">
-                <label for="autor">Autor</label>
+            <p-floatlabel class="w-full mt-2">
+                <input id="creador" type="text" pInputText formControlName="creador" class="w-full">
+                <label for="creador">Creador</label>
             </p-floatlabel>
-
-            <p-floatlabel>
-                <p-inputnumber inputId="integrantes" formControlName="integrantes"
-                    styleClass="w-full" inputStyleClass="w-full">
-                </p-inputnumber>
-                <label for="integrantes">Integrantes</label>
-            </p-floatlabel>
-
-            <p-floatlabel>
-                <p-inputnumber inputId="tickets" formControlName="tickets"
-                    styleClass="w-full" inputStyleClass="w-full">
-                </p-inputnumber>
-                <label for="tickets">Tickets</label>
-            </p-floatlabel>
-
-            <p-floatlabel>
+            <p-floatlabel class="w-full mt-2">
                 <textarea id="descripcion" pTextarea formControlName="descripcion"
                     class="w-full" rows="3" style="resize: none;">
                 </textarea>
                 <label for="descripcion">Descripción</label>
             </p-floatlabel>
-
         </div>
     </form>
 

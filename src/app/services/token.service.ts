@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-    setToken(token: string) { localStorage.setItem('jwt', token); }
+    setToken(token: string) {
+        if (token) {
+            localStorage.setItem('jwt', token);
+        } else {
+            localStorage.removeItem('jwt');
+        }
+    }
     getToken() { return localStorage.getItem('jwt'); }
 
     getDecodedPayload(): any | null {

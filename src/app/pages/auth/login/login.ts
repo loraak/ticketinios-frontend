@@ -64,10 +64,14 @@ onSubmit(): void {
       setTimeout(() => this.router.navigate(['/app/home']), 1000);
     },
     error: (err) => {
+      const msg = err.status === 403
+          ? 'Tu cuenta ha sido dada de baja.'
+          : 'Correo o contraseña incorrectos.';
+
       this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: err.error?.message || 'Credenciales inválidas.'
+          severity: 'error',
+          summary: 'Acceso denegado',
+          detail: msg
       });
     }
   });
