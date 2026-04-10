@@ -11,6 +11,44 @@
         </div>
     </ng-template>
 
+    @if (estadisticas) {
+        <div class="grid mb-5">
+
+            <!-- Cards de resumen -->
+            <div class="col-12">
+                <div class="flex gap-3 mb-4">
+                    <div class="surface-card p-3 border-round shadow-1 border-1 surface-border flex-1 text-center">
+                        <div class="text-3xl font-bold text-primary">{{ estadisticas.total }}</div>
+                        <div class="text-sm text-color-secondary mt-1">Total de tickets</div>
+                    </div>
+                    @for (entry of objectEntries(estadisticas.porEstado); track entry[0]) {
+                        <div class="surface-card p-3 border-round shadow-1 border-1 surface-border flex-1 text-center">
+                            <div class="text-3xl font-bold text-color">{{ entry[1] }}</div>
+                            <div class="text-sm text-color-secondary mt-1">{{ entry[0] }}</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Gráfica por estado -->
+            <div class="col-12 md:col-6">
+                <div class="surface-card p-4 border-round shadow-1 border-1 surface-border">
+                    <h3 class="mt-0 mb-3 text-color">Tickets por estado</h3>
+                    <p-chart type="bar" [data]="chartEstado" [options]="chartOptions" height="250px"></p-chart>
+                </div>
+            </div>
+
+            <!-- Gráfica por prioridad -->
+            <div class="col-12 md:col-6">
+                <div class="surface-card p-4 border-round shadow-1 border-1 surface-border">
+                    <h3 class="mt-0 mb-3 text-color">Tickets por prioridad</h3>
+                    <p-chart type="bar" [data]="chartPrioridad" [options]="chartOptions" height="250px"></p-chart>
+                </div>
+            </div>
+
+        </div>
+    }
+
     <p-table [value]="grupos" [paginator]="true" [rows]="5" dataKey="id">
         <ng-template pTemplate="header">
             <tr>

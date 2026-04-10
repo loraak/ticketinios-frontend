@@ -13,7 +13,7 @@ export interface UsuarioAdmin {
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
     private http = inject(HttpClient);
-    private base = 'http://localhost:8081/api/usuarios';
+    private base = 'http://localhost:3000/api/usuarios';
 
     listar(): Observable<UsuarioAdmin[]> {
         return this.http.get<any>(this.base, { withCredentials: true }).pipe(

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -24,17 +24,19 @@ export interface Comentario { autor: string; texto: string; fecha: Date; }
 export interface Historial { accion: string; fecha: Date; }
 
 export interface Ticket { 
-  id: number; 
+  id: string; 
   titulo: string; 
   descripcion?: string; 
   estado: string; 
-  asignado: string; 
-  creador: string; 
   prioridad: string; 
-  fechaCreacion: Date; 
-  fechaLimite: Date;
-  comentarios: Comentario[]; 
-  historial?: Historial[];  
+  autorId: string;
+  autor: string;
+  asignado: string;
+  asignadoId: string;
+  fechaFinal: Date; 
+  creadoEn: Date;
+  comentarios?: Comentario[];
+  historial?: Historial[];
 }
 
 @Component({
@@ -53,6 +55,7 @@ export interface Ticket {
 
 export class GroupDetail implements OnInit{
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private route = inject(ActivatedRoute);
@@ -60,29 +63,58 @@ export class GroupDetail implements OnInit{
   protected authService = inject(AuthService);
   protected permissionsSvc = inject(PermissionsService);
   grupo: any = null;
-  
   ticketArrastrado: Ticket | null = null; 
   vistaActual: 'kanban' | 'tabla' = 'kanban'; 
   ticketSeleccinoado?: Ticket | null = null; 
+  cargandoGrupo = true;
+  tickets: Ticket[] = [];
+  cargandoTickets = false; 
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.cargarGrupo(id);
+      this.cargarTickets(id); 
     }
   }
 
+  private cargarTickets(grupoId: string): void { 
+    this.cargandoTickets = true;
+    this.http.get<any>(`http://localhost:3000/api/tickets?grupoId=${grupoId}`).subscribe({
+        next: (res) => {
+          this.tickets = res.data.map((t: any) => ({
+            ...t,
+            comentarios: [],
+            historial: []
+          }));
+          this.cargandoTickets = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudieron cargar los tickets.'
+          });
+          this.cargandoTickets = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+      
+
   private cargarGrupo(id: string): void {
+    this.cargandoGrupo = true;
     this.http.get(`http://localhost:3000/api/grupos/${id}`).subscribe({
       next: (res: any) => {
         this.grupo = res.data[0];
+        this.cargandoGrupo = false;
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudo cargar el grupo.'
-        });
+        this.cargandoGrupo = false;
+        this.cdr.detectChanges();
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el grupo.' });
       }
     });
   }
@@ -93,8 +125,8 @@ export class GroupDetail implements OnInit{
   }
 
   esCreador(ticket: Ticket): boolean {
-    const usuarioActual = (this.authService.usuario() as any)?.nombreCompleto;
-    return ticket.creador === usuarioActual;
+    const usuarioActual = (this.authService.usuario() as any)?.id;
+    return ticket.autorId === usuarioActual;
   }
 
   dragStart(ticket: Ticket) {
@@ -105,35 +137,47 @@ export class GroupDetail implements OnInit{
     this.ticketArrastrado = null;
   }
 
-  drop(estadoDestino: string) {
-    if (this.ticketArrastrado && 
-        this.ticketArrastrado.estado !== estadoDestino && 
-        this.esCreador(this.ticketArrastrado)) {
-      
-      this.ticketArrastrado.estado = estadoDestino;
-    }
+drop(estadoDestino: string) {
+  if (!this.ticketArrastrado) return;
+  if (this.ticketArrastrado.estado === estadoDestino) {
     this.ticketArrastrado = null;
+    return;
   }
 
-  usuarios = ['Jonathan Joestar', 'Kakyoin', 'Mista', 'Narancia', 'Giorno Giovanna', 'Fugo', 'Abbachio', 'Bruno Bucciarati', 'Trisha'];
+  if (!this.esCreador(this.ticketArrastrado)) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Sin permiso',
+      detail: 'Solo el creador puede cambiar el estado del ticket.'
+    });
+    this.ticketArrastrado = null;
+    return;
+  }
 
+  const ticket = this.ticketArrastrado;
+  const estadoAnterior = ticket.estado;
 
-    tickets : Ticket[] = [
-        { id: 101, titulo: 'Derrotar a Diavolo', descripcion: 'Matar al Diavolo', estado: 'Hecho',  creador: 'Bruno Bucciarati', asignado: 'Giorno Giovanna', prioridad: 'Alta', fechaCreacion: new Date('2026-03-01'), fechaLimite: new Date('2026-03-15'), comentarios: [], historial: []},
-        { id: 102, titulo: 'Matar a Dio', estado: 'En Progreso', creador:'Zeppeli',  asignado: 'Jonathan', prioridad: 'Baja', fechaCreacion: new Date('2026-03-03'), fechaLimite: new Date('2026-12-03'), comentarios: [] },
-        { id: 103, titulo: 'Sacar a pasear a Polnareff', estado: 'Hecho', creador: 'Giorno Giovanna', asignado: 'Giorno Giovanna', prioridad: 'Media', fechaCreacion: new Date('2026-03-05'), fechaLimite: new Date('2026-03-20'), comentarios: [] },
-        { id: 104, titulo: 'Encontrar a número 5', estado: 'Bloqueado', creador: 'Mista', asignado: 'Mista', prioridad: 'Media', fechaCreacion: new Date('2026-02-28'), fechaLimite: new Date('2026-03-10'), comentarios: []  },
-        { id: 105, titulo: 'Bañar a Mista', estado: 'En Progreso', creador: 'Giorno Giovanna', asignado: 'Trish', prioridad: 'Crítica', fechaCreacion: new Date('2026-01-04'), fechaLimite: new Date('2026-05-04'), comentarios: [] },
-        { id: 106, titulo: 'Estudiar la tabla del 1', estado: 'En Progreso', creador: 'Fugo', asignado: 'Narancia', prioridad: 'Media', fechaCreacion: new Date('2026-02-03'), fechaLimite: new Date('2026-06-02'), comentarios: [] },
-        { id: 107, titulo: 'Enseñar la tabla del 1', estado: 'Hecho', creador: 'Abbacchio', asignado: 'Fugo', prioridad: 'Baja', fechaCreacion: new Date('2026-03-01'), fechaLimite: new Date('2026-03-15'), comentarios: []  },
-        { id: 108, titulo: 'Revivir a Passione', estado: 'Bloqueado', creador: 'Bruno Bucciarati', asignado: 'Giorno Giovanna', prioridad: 'Alta', fechaCreacion: new Date('2026-07-01'), fechaLimite: new Date('2026-05-02'), comentarios: [] },
-        { id: 109, titulo: 'Echarse unas carnitas asadas', estado: 'Hecho', creador: 'Giorno Giovanna', asignado: 'Mista', prioridad: 'Media', fechaCreacion: new Date('2026-03-05'), fechaLimite: new Date('2026-03-20'), comentarios: [] },
-        { id: 110, titulo: 'Revivir', estado: 'En Profreso', asignado: 'Kakyoin', creador: 'Loro', prioridad: 'Crítica', fechaCreacion: new Date('2026-02-28'), fechaLimite: new Date('2026-03-10'), comentarios: []},
-        
-    ];
+  ticket.estado = estadoDestino;
+  this.tickets = [...this.tickets];
+  this.ticketArrastrado = null;
 
-  estados = ['Pendiente', 'En Progreso', 'Bloqueado', 'Hecho'];
-  prioridades = ['Baja', 'Media', 'Alta', 'Crítica'];
+  this.http.patch(`http://localhost:3000/api/tickets/${ticket.id}`, {
+    estado: estadoDestino
+  }).subscribe({
+    error: () => {
+      ticket.estado = estadoAnterior;
+      this.tickets = [...this.tickets];
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo actualizar el estado del ticket.'
+      });
+    }
+  });
+}
+
+  estados = ['Revisión', 'Por hacer', 'Hecho', 'Cancelado'];
+  prioridades = ['Baja', 'Media', 'Alta'];
 
   modoEdicion = false;
   modalVisible = false;
@@ -166,6 +210,7 @@ export class GroupDetail implements OnInit{
     this.modalVisible = true;
   }
 
+  /*
   editarTicket(ticket: Ticket) {
     this.modoEdicion = true;
     this.ticketSeleccionado = ticket;
@@ -175,6 +220,7 @@ export class GroupDetail implements OnInit{
       ...ticket,
       fechaLimite: fechaFormateada
     });
+    
 
     if (this.esCreador(ticket)) {
       this.form.enable(); 
@@ -184,7 +230,9 @@ export class GroupDetail implements OnInit{
 
     this.modalVisible = true;
   }
+    */
 
+  /*
     agregarComentario(inputEl: HTMLInputElement) {
         const texto = inputEl.value.trim();
         if (!texto || !this.ticketSeleccionado) return;
@@ -192,6 +240,7 @@ export class GroupDetail implements OnInit{
         this.ticketSeleccionado?.comentarios.push({ autor: nombreUsuario, texto, fecha: new Date() });
         inputEl.value = '';
     }
+        */
 
 
   eliminarTicket(ticket: Ticket) {
@@ -246,7 +295,7 @@ export class GroupDetail implements OnInit{
   }
 
   get misTickets() {
-    const usuarioActual = (this.authService.usuario() as any)?.nombreCompleto;
-    return this.tickets.filter(t => t.asignado === usuarioActual);
+    const usuarioActual = (this.authService.usuario() as any)?.id;
+    return this.tickets.filter(t => t.asignadoId === usuarioActual);
   }
 }

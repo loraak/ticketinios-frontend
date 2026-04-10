@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router'; 
-
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -11,6 +10,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TextareaModule } from 'primeng/textarea';
 import { TagModule } from 'primeng/tag';
+import { ChartModule } from 'primeng/chart';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -40,7 +40,7 @@ interface Group {
         TableModule, CardModule, ButtonModule, DialogModule,
         InputTextModule, InputNumberModule, TextareaModule,
         TagModule, ToastModule, ConfirmDialogModule,
-        FloatLabelModule, DividerModule,
+        FloatLabelModule, DividerModule, ChartModule,
         HasPermissionDirective
     ],
     providers: [MessageService, ConfirmationService],
@@ -60,9 +60,81 @@ export class Grupos implements OnInit {
     grupos: Group[] = [];
     loading = false; 
 
+    // las gráficas
+    estadisticas: any = null;
+    chartEstado: any = null;
+    chartPrioridad: any = null;
+    chartOptions = {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1,
+                    precision: 0   
+                }
+            }
+        }
+    };
+
+    objectEntries(obj: any): [string, number][] {
+        return obj ? Object.entries(obj) : [];
+    }
+
+    private coloresEstado = ['#4CAF50', '#2196F3', '#FF9800', '#F44336', '#9C27B0'];
+    private coloresPrioridad = ['#4CAF50', '#FF9800', '#F44336'];
+
+
+    cargarEstadisticas() {
+        this.http.get<any>('http://localhost:3000/api/tickets/estadisticas').subscribe({
+            next: (res) => {
+                const stats = res.data[0];
+                this.estadisticas = stats;
+
+                const estadoLabels = Object.keys(stats.porEstado);
+                const estadoValues = Object.values(stats.porEstado);
+
+                const prioridadLabels = Object.keys(stats.porPrioridad);
+                const prioridadValues = Object.values(stats.porPrioridad);
+
+                this.chartEstado = {
+                    labels: estadoLabels,
+                    datasets: [{
+                        label: 'Tickets por estado',
+                        data: estadoValues,
+                        backgroundColor: this.coloresEstado.slice(0, estadoLabels.length),
+                    }]
+                };
+
+                this.chartPrioridad = {
+                    labels: prioridadLabels,
+                    datasets: [{
+                        label: 'Tickets por prioridad',
+                        data: prioridadValues,
+                        backgroundColor: this.coloresPrioridad.slice(0, prioridadLabels.length),
+                    }]
+                };
+
+                this.cdr.detectChanges(); // <-- agrega esto al final
+            },
+            error: () => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudieron cargar las estadísticas.'
+                });
+            }
+        });
+    }
+
     ngOnInit() {
         this.cargarGrupos();
+        this.cargarEstadisticas();
     }
+
 
     cargarGrupos() { 
         this.loading = true;

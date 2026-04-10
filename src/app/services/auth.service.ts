@@ -33,7 +33,6 @@ export class AuthService {
     login(email: string, password: string): Observable<any> {
         return this.http.post('http://localhost:3000/api/auth/login',
             { email, password },
-            { withCredentials: true }
         ).pipe(
             tap((response: any) => {
                 const usuario = response.data[0].usuario;
@@ -43,7 +42,7 @@ export class AuthService {
                 const usuarioCompleto = { ...payload, ...usuario };
 
                 this._usuario.set(usuarioCompleto);
-                localStorage.setItem('usuario', JSON.stringify(usuarioCompleto)); // ← persiste
+                localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
                 this.permsSvc.setPermissions(payload?.permisos ?? []);
             })
         );

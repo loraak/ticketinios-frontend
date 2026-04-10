@@ -2,33 +2,36 @@
 <p-confirmDialog></p-confirmDialog>
 
 <div class="p-4 surface-ground min-h-screen">
-    <div class="surface-card p-4 border-round shadow-1 border-1 surface-border mb-5">
-        <div class="flex justify-content-between align-items-start">
-            <div>
-                <h1 class="m-0 text-2xl font-bold text-color">{{ grupo.nombre }}</h1>
-                <p class="mt-2 mb-0 text-color-secondary">{{ grupo.descripcion }}</p>
+
+    @if (grupo) {
+        <div class="surface-card p-4 border-round shadow-1 border-1 surface-border mb-5">
+            <div class="flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="m-0 text-2xl font-bold text-color">{{ grupo.nombre }}</h1>
+                    <p class="mt-2 mb-0 text-color-secondary">{{ grupo.descripcion }}</p>
+                </div>
+                <p-tag 
+                    [value]="grupo.activo ? 'Activo' : 'Inactivo'" 
+                    [severity]="grupo.activo ? 'success' : 'danger'">
+                </p-tag>
             </div>
-            <p-tag 
-                [value]="grupo.activo ? 'Activo' : 'Inactivo'" 
-                [severity]="grupo.activo ? 'success' : 'danger'">
-            </p-tag>
+            <div class="flex gap-4 mt-3 pt-3 border-top-1 surface-border">
+                <div class="flex align-items-center gap-2 text-sm text-color-secondary">
+                    <i class="pi pi-user"></i>
+                    <span>Creado por <strong class="text-color">{{ grupo.creador }}</strong></span>
+                </div>
+                <div class="flex align-items-center gap-2 text-sm text-color-secondary">
+                    <i class="pi pi-calendar"></i>
+                    <span>{{ formatearFecha(grupo.creado_en) | date:'dd/MM/yyyy' }}</span>
+                </div>
+            </div>
         </div>
-        <div class="flex gap-4 mt-3 pt-3 border-top-1 surface-border">
-            <div class="flex align-items-center gap-2 text-sm text-color-secondary">
-                <i class="pi pi-user"></i>
-                <span>Creado por <strong class="text-color">{{ grupo.creador }}</strong></span>
-            </div>
-            <div class="flex align-items-center gap-2 text-sm text-color-secondary">
-                <i class="pi pi-calendar"></i>
-                <span>{{ formatearFecha(grupo.creado_en) | date:'dd/MM/yyyy' }}</span>
-            </div>
+    } @else {
+        <div class="surface-card p-4 border-round shadow-1 border-1 surface-border mb-5">
+            <p-skeleton height="2rem" class="mb-2"></p-skeleton>
+            <p-skeleton height="1rem" width="60%"></p-skeleton>
         </div>
-    </div>
-    
-    <div class="surface-card p-4 border-round shadow-1 border-1 surface-border mb-5" *ngIf="!grupo">
-        <p-skeleton height="2rem" class="mb-2"></p-skeleton>
-        <p-skeleton height="1rem" width="60%"></p-skeleton>
-    </div>
+    }
     
     <div class="mb-5">
         <div *ifHasPermission="['groups:mistickets']">
@@ -40,7 +43,7 @@
                             <div class="font-medium text-color">{{ ticket.titulo }}</div>
                             <p-tag [value]="ticket.estado" severity="info" class="mt-2"></p-tag>
                             <div class="text-sm text-color-secondary mt-2">
-                                <i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}
+                                <i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaFinal | date:'dd/MM/yyyy' }}
                             </div>
                         </div>
                     </div>
@@ -78,8 +81,7 @@
                             <div class="surface-card p-3 border-round shadow-1 border-1 surface-border transition-colors transition-duration-150 cursor-pointer"
                                 pDraggable="tickets" 
                                 (onDragStart)="dragStart(ticket)" 
-                                (onDragEnd)="dragEnd()"
-                                (click)="editarTicket(ticket)">
+                                (onDragEnd)="dragEnd()">
                                 <div class="flex justify-content-between align-items-start mb-2">
                                     <div class="font-medium text-color">{{ ticket.titulo }}</div>
                                     <div class="flex gap-1">
@@ -92,9 +94,9 @@
                                 </div>
                                 
                                 <div class="text-sm text-color-secondary flex flex-column gap-1">
-                                    <span class="flex align-items-center gap-2"><i class="pi pi-user text-xs"></i> Creado por: {{ ticket.creador }}</span>
+                                    <span class="flex align-items-center gap-2"><i class="pi pi-user text-xs"></i> Creado por: {{ ticket.autor }}</span>
                                     <span class="flex align-items-center gap-2"><i class="pi pi-user text-xs"></i> Asignado a: {{ ticket.asignado }}</span>
-                                    <span class="flex align-items-center gap-2"><i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</span>
+                                    <span class="flex align-items-center gap-2"><i class="pi pi-calendar text-xs"></i> Vence: {{ ticket.fechaFinal | date:'dd/MM/yyyy' }}</span>
                                 </div>
                             </div>
 
@@ -123,10 +125,10 @@
                     <tr>
                         <th pSortableColumn="id">Título <p-sortIcon field="id"></p-sortIcon></th>
                         <th pSortableColumn="estado">Estado <p-sortIcon field="estado"></p-sortIcon></th>
-                        <th pSortableColumn="asignado">Creado por <p-sortIcon field="creador"></p-sortIcon></th>
-                        <th pSortableColumn="asignado">Asignado a <p-sortIcon field="asignado"></p-sortIcon></th>
+                        <th pSortableColumn="autorId">Creado por <p-sortIcon field="autorId"></p-sortIcon></th>
+                        <th pSortableColumn="asignadoId">Asignado a <p-sortIcon field="asignadoId"></p-sortIcon></th>
                         <th pSortableColumn="prioridad">Prioridad <p-sortIcon field="prioridad"></p-sortIcon></th>
-                        <th pSortableColumn="fechaLimite">Fecha Límite <p-sortIcon field="fechaLimite"></p-sortIcon></th>
+                        <th pSortableColumn="fechaFinal">Fecha Límite <p-sortIcon field="fechaFinal"></p-sortIcon></th>
                         <th class="text-center">Acciones</th>
                     </tr>
                     <tr>
@@ -160,12 +162,15 @@
 
                 <ng-template pTemplate="body" let-ticket>
                     <tr>
+                        <!--
                         <td class="font-medium cursor-pointer text-primary" (click)="editarTicket(ticket)">#{{ ticket.id }} - {{ ticket.titulo }}</td>
+                        -->
+                        <td class="font-medium cursor-pointer text-primary">{{ ticket.titulo }}</td>
                         <td><p-tag [value]="ticket.estado" severity="info"></p-tag></td>
-                        <td>{{ ticket.creador }}</td>
+                        <td>{{ ticket.autor }}</td>
                         <td>{{ ticket.asignado }}</td>
                         <td><p-tag [value]="ticket.prioridad" [severity]="getSeverity(ticket.prioridad)"></p-tag></td>
-                        <td>{{ ticket.fechaLimite | date:'dd/MM/yyyy' }}</td>
+                        <td>{{ ticket.fechaFinal | date:'dd/MM/yyyy' }}</td>
                         <td class="text-center">
                             @if (esCreador(ticket)) {
                                 <p-button *ifHasPermission="['ticket:baja']" icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" size="small" (click)="$event.stopPropagation(); eliminarTicket(ticket)"></p-button>
@@ -209,7 +214,9 @@
                         <label class="block mb-1 text-sm text-color-secondary font-medium">Asignado a</label>
                         <select formControlName="asignado" class="w-full p-inputtext" style="appearance: auto;">
                             <option value="" disabled>Seleccione un usuario...</option>
+                            <!--
                             @for (usr of usuarios; track usr) { <option [value]="usr">{{ usr }}</option> }
+                            -->
                         </select>
                     </div>
                     <div class="col-6">
@@ -232,10 +239,12 @@
                     </div>
                 }
             </div>
+            <!--
             <div class="flex gap-2 mb-4">
                 <input #comentarioInput type="text" pInputText placeholder="Añadir comentario..." class="w-full text-sm" (keyup.enter)="agregarComentario(comentarioInput)">
                 <p-button icon="pi pi-send" (onClick)="agregarComentario(comentarioInput)"></p-button>
             </div>
+            -->
 
             <h4 class="m-0 mb-3 text-color">Historial</h4>
             <div class="flex-1 overflow-y-auto" style="max-height: 100px;">
