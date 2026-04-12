@@ -1,7 +1,6 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<!--
 <p-card>
     <ng-template pTemplate="header">
         <div class="flex justify-content-between align-items-center px-4 pt-3">
@@ -10,7 +9,7 @@
                 Panel de Usuarios
                 </h2>
             </div>
-            <p-button *ifHasPermission="['usuario:crear']" label="Nuevo Usuario" icon="pi pi-plus" (onClick)="abrirNuevo()"></p-button>
+            <p-button *ifHasPermission="['usuarios:crear']" label="Nuevo Usuario" icon="pi pi-plus" (onClick)="abrirNuevo()"></p-button>
         </div>
     </ng-template>
 
@@ -19,7 +18,6 @@
             <tr>
                 <th>Nombre</th>
                 <th>Email</th>
-                <th>Permisos</th>
                 <th>Estado</th>
                 <th style="width: 13rem;">Acciones</th>
             </tr>
@@ -30,9 +28,6 @@
                 <td class="font-medium">{{ usuario.nombreCompleto }}</td>
                 <td class="text-color-secondary">{{ usuario.email }}</td>
                 <td>
-                    <p-tag [value]="usuario.permisos.length + ' / ' + PERMISOS_LEGIBLES.length" severity="info"></p-tag>
-                </td>
-                <td>
                     <p-tag
                         [value]="usuario.activo ? 'Activo' : 'Baja'"
                         [severity]="usuario.activo ? 'success' : 'danger'">
@@ -41,23 +36,25 @@
                 <td>
                     <div class="flex gap-1">
                         <p-button icon="pi pi-shield" [rounded]="true" [text]="true"
-                            *ifHasPermission="['usuario:gestionarpermisos']"
                             pTooltip="Gestionar permisos"
+                            *ifHasPermission="['usuarios:gestionar_permisos']"
                             severity="info"
+                            [disabled]="!usuario.activo"
                             (onClick)="abrirPermisos(usuario)">
                         </p-button>
                         <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
-                            *ifHasPermission="['usuario:editar']"
                             pTooltip="Editar usuario"
+                            *ifHasPermission="['usuarios:editar']"
                             (onClick)="abrirEditar(usuario)"
                             [disabled]="!usuario.activo">
                         </p-button>
-                        <p-button icon="pi pi-ban" [rounded]="true" [text]="true"
-                            *ifHasPermission="['usuario:baja']"
-                            severity="danger"
-                            pTooltip="Dar de baja"
-                            (onClick)="confirmarBaja(usuario)"
-                            [disabled]="!usuario.activo">
+                        <p-button 
+                            [icon]="usuario.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
+                            [rounded]="true" [text]="true"
+                            [severity]="usuario.activo ? 'danger' : 'success'"
+                            *ifHasPermission="['usuarios:eliminar']"
+                            [pTooltip]="usuario.activo ? 'Dar de baja' : 'Reactivar'"
+                            (onClick)="confirmarCambioEstado(usuario)">
                         </p-button>
                     </div>
                 </td>
@@ -162,65 +159,94 @@
     [draggable]="false">
 
     <form [formGroup]="form">
-        <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
+        <div style="display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem 0 0.5rem;">
 
-            <p-floatlabel>
-                <input id="nombreCompleto" type="text" pInputText formControlName="nombreCompleto" class="w-full">
-                <label for="nombreCompleto">Nombre Completo</label>
-            </p-floatlabel>
-            @if (form.get('nombreCompleto')!.touched && form.get('nombreCompleto')!.errors?.['required']) {
-                <small class="p-error block" style="margin-top: -1rem;">El nombre es requerido.</small>
-            }
-
-            <p-floatlabel>
-                <input id="email" type="email" pInputText formControlName="email" class="w-full">
-                <label for="email">Email</label>
-            </p-floatlabel>
-            @if (form.get('email')!.touched && form.get('email')!.errors) {
-                @if (form.get('email')!.errors!['required']) {
-                    <small class="p-error block" style="margin-top: -1rem;">El email es requerido.</small>
+            <div>
+                <p-floatlabel>
+                    <input id="nombreCompleto" type="text" pInputText formControlName="nombreCompleto" class="w-full">
+                    <label for="nombreCompleto">Nombre Completo</label>
+                </p-floatlabel>
+                @if (form.get('nombreCompleto')!.touched && form.get('nombreCompleto')!.errors?.['required']) {
+                    <small class="p-error block mt-2">El nombre es requerido.</small>
                 }
-                @if (form.get('email')!.errors!['email']) {
-                    <small class="p-error block" style="margin-top: -1rem;">Formato de email inválido.</small>
+            </div>
+
+            <div>
+                <p-floatlabel>
+                    <input id="email" type="email" pInputText formControlName="email" class="w-full">
+                    <label for="email">Email</label>
+                </p-floatlabel>
+                @if (form.get('email')!.touched && form.get('email')!.errors) {
+                    @if (form.get('email')!.errors!['required']) {
+                        <small class="p-error block mt-2">El email es requerido.</small>
+                    }
+                    @if (form.get('email')!.errors!['email']) {
+                        <small class="p-error block mt-2">Formato de email inválido.</small>
+                    }
                 }
+            </div>
+
+            <div>
+                <p-floatlabel>
+                    <input id="usuario" type="text" pInputText formControlName="usuario" class="w-full">
+                    <label for="usuario">Nombre de Usuario</label>
+                </p-floatlabel>
+                @if (form.get('usuario')!.touched && form.get('usuario')!.errors?.['required']) {
+                    <small class="p-error block mt-2">El nombre de usuario es requerido.</small>
+                }
+            </div>
+
+            @if (!modoEdicion) {
+                <div>
+                    <p-floatlabel>
+                        <p-password inputId="password" formControlName="password"
+                            [toggleMask]="true" [feedback]="false"
+                            styleClass="w-full" inputStyleClass="w-full">
+                        </p-password>
+                        <label for="password">Contraseña</label>
+                    </p-floatlabel>
+                    @if (form.get('password')!.touched && form.get('password')!.errors?.['required']) {
+                        <small class="p-error block mt-2">La contraseña es requerida.</small>
+                    }
+                </div>
             }
 
-            <p-floatlabel>
-                <p-password inputId="password" formControlName="password"
-                    [toggleMask]="true" [feedback]="false"
-                    styleClass="w-full" inputStyleClass="w-full">
-                </p-password>
-                <label for="password">
-                    {{ modoEdicion ? 'Nueva contraseña (vacío = sin cambios)' : 'Contraseña' }}
-                </label>
-            </p-floatlabel>
-            @if (form.get('password')!.touched && form.get('password')!.errors?.['required']) {
-                <small class="p-error block" style="margin-top: -1rem;">La contraseña es requerida.</small>
+            @if (!modoEdicion) {
+                <div>
+                    <p-floatlabel>
+                        <input id="direccion" type="text" pInputText formControlName="direccion" class="w-full">
+                        <label for="direccion">Dirección</label>
+                    </p-floatlabel>
+                    @if (form.get('direccion')!.touched && form.get('direccion')!.errors?.['required']) {
+                        <small class="p-error block mt-2">La dirección es requerida.</small>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm text-color-secondary mb-2">Fecha de Nacimiento</label>
+                    <input id="fechaNacimiento" type="date" pInputText
+                        formControlName="fechaNacimiento" class="w-full">
+                    @if (form.get('fechaNacimiento')!.touched && form.get('fechaNacimiento')!.errors?.['required']) {
+                        <small class="p-error block mt-2">La fecha de nacimiento es requerida.</small>
+                    }
+                </div>
+
+                <div>
+                    <p-floatlabel>
+                        <input id="telefono" type="text" pInputText formControlName="telefono" class="w-full">
+                        <label for="telefono">Teléfono</label>
+                    </p-floatlabel>
+                    @if (form.get('telefono')!.touched && form.get('telefono')!.errors?.['required']) {
+                        <small class="p-error block mt-2">El teléfono es requerido.</small>
+                    }
+                    @if (form.get('telefono')!.touched && form.get('telefono')!.errors?.['pattern']) {
+                        <small class="p-error block mt-2">El teléfono debe tener exactamente 10 dígitos.</small>
+                    }
+                </div>
             }
-
-            <p-floatlabel>
-                <input id="usuario" type="text" pInputText formControlName="usuario" class="w-full">
-                <label for="usuario">Nombre de Usuario</label>
-            </p-floatlabel>
-
-            <p-floatlabel>
-                <input id="direccion" type="text" pInputText formControlName="direccion" class="w-full">
-                <label for="direccion">Dirección</label>
-            </p-floatlabel>
-
-            <p-floatlabel>
-                <input id="fechaNacimiento" type="date" pInputText formControlName="fechaNacimiento" class="w-full">
-                <label for="fechaNacimiento">Fecha de Nacimiento</label>
-            </p-floatlabel>
-
-            <p-floatlabel>
-                <input id="telefono" type="text" pInputText formControlName="telefono" class="w-full">
-                <label for="telefono">Teléfono</label>
-            </p-floatlabel>
 
         </div>
     </form>
-
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" severity="secondary" [text]="true"
             (onClick)="modalUsuarioVisible = false">
@@ -231,4 +257,3 @@
     </ng-template>
     
 </p-dialog>
--->

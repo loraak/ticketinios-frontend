@@ -107,7 +107,10 @@ export class GestionarGrupos implements OnInit {
 
     cargarUsuarios() {
         this.http.get<any>('http://localhost:3000/api/usuarios').subscribe({
-            next: (res) => this.usuarios = res.data
+            next: (res) => {
+                this.usuarios = res.data;
+                this.cdr.detectChanges(); // ← agrega esto
+            }
         });
     }
 
@@ -150,7 +153,6 @@ export class GestionarGrupos implements OnInit {
             return;
         }
 
-        // Ejecuta todas las peticiones en paralelo
         Promise.all(peticiones.map(p => p.toPromise())).then(() => {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Miembros actualizados.' });
             this.modalMiembrosVisible = false;
@@ -164,7 +166,7 @@ export class GestionarGrupos implements OnInit {
         this.grupoSeleccionado = grupo;
         this.miembroSeleccionado = miembro;
 
-        this.http.get<any>(`http://localhost:3000/api/grupos/${grupo.id}/permisos`).subscribe({
+        this.http.get<any>(`http://localhost:3000/api/grupos/${grupo.id}/permisos/${miembro.usuarioId}`).subscribe({
             next: (res) => {
                 this.permisosSeleccionados = res.data ?? [];
                 this.modalPermisosVisible = true;
@@ -200,7 +202,7 @@ export class GestionarGrupos implements OnInit {
             acceptButtonProps: { severity: grupo.activo ? 'danger' : 'success' },
             rejectButtonProps: { severity: 'secondary', text: true },
             accept: () => {
-                this.http.patch(`http://localhost:3000/api/grupos/estado/${grupo.id}`, {}).subscribe({
+                this.http.patch(`http://localhost:3000/api/grupos/admin/estado/${grupo.id}`, {}).subscribe({
                     next: () => {
                         this.grupos = this.grupos.map(g =>
                             g.id === grupo.id ? { ...g, activo: !g.activo } : g

@@ -39,6 +39,7 @@
                             [rounded]="true" 
                             [text]="true" 
                             severity="info"
+                            *ifHasPermission="['gestionarGrupos:agregar_usuario']"
                             pTooltip="Gestionar miembros"
                             (onClick)="abrirModalMiembros(grupo)">
                         </p-button>
@@ -47,6 +48,7 @@
                             [rounded]="true" 
                             [text]="true" 
                             [severity]="grupo.activo ? 'danger' : 'success'"
+                            *ifHasPermission="['gestionarGrupos:eliminar']"
                             [pTooltip]="grupo.activo ? 'Dar de baja' : 'Dar de alta'"
                             (onClick)="confirmarEliminarGrupo(grupo)">
                         </p-button>
@@ -92,7 +94,6 @@
             </p-multiSelect>
         </div>
 
-        <!-- Miembros actuales con sus permisos -->
         @if (miembrosActuales.length > 0) {
             <div>
                 <label class="block mb-2 text-sm font-medium text-color-secondary">Miembros actuales</label>
@@ -112,6 +113,7 @@
                                     [rounded]="true"
                                     [text]="true"
                                     severity="warn"
+                                    *ifHasPermission="['gestionarGrupos:modificar_permisos']"
                                     pTooltip="Configurar permisos"
                                     (onClick)="abrirModalPermisos(grupoSeleccionado!, miembro)">
                                 </p-button>

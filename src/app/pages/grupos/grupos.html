@@ -72,7 +72,7 @@
                 </td>
                 <td>
                     <div class="flex gap-2">
-                        <p-button *ifHasPermission="['grupos:ver_especifico']" icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo(grupo.id)"></p-button>
+                        <p-button *ifHasPermission="['grupos:ver_especifico']" icon="pi pi-eye" [rounded]="true" [text]="true" severity="info" pTooltip="Ingresar al grupo" (onClick)="ingresarGrupo(grupo.id)"  [disabled]="!grupo.activo"></p-button>
                         <p-button 
                             *ngIf="permissionsSvc.hasPermissionInGroup(grupo.id, 'grupos:editar')"
                             icon="pi pi-pencil"
