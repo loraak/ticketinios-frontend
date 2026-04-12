@@ -20,6 +20,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { AuthService } from '../../services/auth.service';
 import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
+import { environment } from '../../../environments/environment.prod';
 
 @Component({
     selector: 'app-perfil',
@@ -112,7 +113,7 @@ export class Perfil {
             formValue.fechaNacimiento = `${day}/${month}/${year}`;
         }
 
-        this.http.put(`http://localhost:3000/api/auth/update`, formValue).subscribe({
+        this.http.put(`${environment.apiUrl}/api/auth/update`, formValue).subscribe({
             next: () => {
                 this.loading = false;
                 this.modalVisible = false; 
@@ -147,7 +148,7 @@ export class Perfil {
                 const id = this.authService.usuario()?.id;
                 if (!id) return;
 
-                this.http.patch(`http://localhost:3000/api/auth/baja`, {}).subscribe({
+                this.http.patch(`${environment.apiUrl}/api/auth/baja`, {}).subscribe({
                     next: () => {
                         this.messageService.add({
                             severity: 'warn',

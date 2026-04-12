@@ -19,6 +19,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { PermissionsService } from '../../services/permissions.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment.prod';
 
 export interface UsuarioAdmin {
     id: string;
@@ -136,7 +137,7 @@ export class GestionarUsuarios implements OnInit {
 
     cargarUsuarios() {
         this.loading = true;
-        this.http.get<any>('http://localhost:3000/api/usuarios').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/usuarios`).subscribe({
             next: (res) => {
                 this.usuarios = res.data;
                 this.loading = false;
@@ -147,10 +148,10 @@ export class GestionarUsuarios implements OnInit {
     }
 
     cargarPermisos() {
-        this.http.get<any>('http://localhost:3000/api/usuarios/permisos').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/usuarios/permisos`).subscribe({
             next: (res) => {
                 this.PERMISOS_LEGIBLES = res.data.map((p: any) => ({
-                    permiso: p.nombre,        // ajusta según lo que devuelve tu API
+                    permiso: p.nombre,       
                     label:   p.descripcion ?? p.nombre,
                     grupo:   p.grupo ?? 'General'
                 }));
@@ -207,7 +208,7 @@ export class GestionarUsuarios implements OnInit {
     }
 
         if (this.modoEdicion && this.usuarioSeleccionado) {
-            this.http.put<any>(`http://localhost:3000/api/usuarios/${this.usuarioSeleccionado.id}`, formValue)
+            this.http.put<any>(`${environment.apiUrl}/api/usuarios/${this.usuarioSeleccionado.id}`, formValue)
             .subscribe({
                 next: () => {
                     this.usuarios = this.usuarios.map(u =>
@@ -227,7 +228,7 @@ export class GestionarUsuarios implements OnInit {
                 }
             });
         } else {
-            this.http.post<any>('http://localhost:3000/api/auth/register', formValue).subscribe({
+            this.http.post<any>(`${environment.apiUrl}/api/auth/register`, formValue).subscribe({
                 next: () => {
                     this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario creado.' });
                     this.modalUsuarioVisible = false;
@@ -254,7 +255,7 @@ export class GestionarUsuarios implements OnInit {
         if (!this.usuarioSeleccionado) return;
 
         this.http.put<any>(
-            `http://localhost:3000/api/usuarios/${this.usuarioSeleccionado.id}/permisos`,
+            `${environment.apiUrl}/api/usuarios/${this.usuarioSeleccionado.id}/permisos`,
             { permisos: this.permisosSeleccionados }
         ).subscribe({
             next: () => {
@@ -286,8 +287,8 @@ export class GestionarUsuarios implements OnInit {
             rejectButtonProps: { severity: 'secondary', text: true },
             accept: () => {
                 const url = esActivo
-                    ? `http://localhost:3000/api/usuarios/${usuario.id}/baja`
-                    : `http://localhost:3000/api/usuarios/${usuario.id}/activar`;
+                    ? `${environment.apiUrl}/api/usuarios/${usuario.id}/baja`
+                    : `${environment.apiUrl}/api/usuarios/${usuario.id}/activar`;
 
                 this.http.patch(url, {}).subscribe({
                     next: () => {

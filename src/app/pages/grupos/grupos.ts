@@ -22,6 +22,7 @@ import { PermissionsService } from '../../services/permissions.service';
 import { HasPermissionDirective } from '../../directives/has-permission.directive'; 
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core'
+import { environment } from '../../../environments/environment';
 
 interface Group {
     id: string;
@@ -89,7 +90,7 @@ export class Grupos implements OnInit {
 
 
     cargarEstadisticas() {
-        this.http.get<any>('http://localhost:3000/api/tickets/estadisticas').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/tickets/estadisticas`).subscribe({
             next: (res) => {
                 const stats = res.data[0];
                 this.estadisticas = stats;
@@ -138,7 +139,7 @@ export class Grupos implements OnInit {
 
     cargarGrupos() { 
         this.loading = true;
-        this.http.get<any>('http://localhost:3000/api/grupos').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/grupos`).subscribe({
             next: (res) => {
                 this.grupos = res.data;
                 this.loading = false;
@@ -189,7 +190,7 @@ export class Grupos implements OnInit {
     
         if (this.modoEdicion && this.grupoSeleccionado) {
             this.http.put<any>(
-                `http://localhost:3000/api/grupos/${this.grupoSeleccionado.id}`,
+                `${environment.apiUrl}/api/grupos/${this.grupoSeleccionado.id}`,
                 this.form.value
             ).subscribe({
                 next: (res) => {
@@ -210,7 +211,7 @@ export class Grupos implements OnInit {
                 }
             });
         } else {
-            this.http.post<any>('http://localhost:3000/api/grupos', {
+            this.http.post<any>(`${environment.apiUrl}/api/grupos`, {
                 ...this.form.value,
                 nombre:        this.form.value.nombre,
                 descripcion:   this.form.value.descripcion,
@@ -250,7 +251,7 @@ export class Grupos implements OnInit {
             acceptButtonProps: { severity: severidad },
             rejectButtonProps: { severity: 'secondary', text: true },
             accept: () => {
-                this.http.patch<any>(`http://localhost:3000/api/grupos/estado/${grupo.id}`, {})
+                this.http.patch<any>(`${environment.apiUrl}/api/grupos/estado/${grupo.id}`, {})
                     .subscribe({
                         next: (res) => {
                             const idx = this.grupos.findIndex(g => g.id === grupo.id);

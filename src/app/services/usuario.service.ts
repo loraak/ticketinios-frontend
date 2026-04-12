@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export interface UsuarioAdmin {
     id: string;
@@ -13,7 +14,7 @@ export interface UsuarioAdmin {
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
     private http = inject(HttpClient);
-    private base = 'http://localhost:3000/api/usuarios';
+    private base = `${environment.apiUrl}/api/usuarios`;
 
     listar(): Observable<UsuarioAdmin[]> {
         return this.http.get<any>(this.base, { withCredentials: true }).pipe(

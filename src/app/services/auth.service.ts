@@ -4,6 +4,7 @@ import { TokenService } from './token.service';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment.prod';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -31,7 +32,7 @@ export class AuthService {
     }
 
     login(email: string, password: string): Observable<any> {
-        return this.http.post('http://localhost:3000/api/auth/login',
+        return this.http.post(`${environment.apiUrl}/api/auth/login`,
             { email, password },
         ).pipe(
             tap((response: any) => {

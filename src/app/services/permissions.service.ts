@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PermissionsService {
@@ -34,7 +35,7 @@ export class PermissionsService {
     }
 
     refreshPermissionsForGroup(groupId: string, onDone?: () => void): void {
-        this.http.get<any>(`http://localhost:3000/api/grupos/${groupId}/permisos`).subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/grupos/${groupId}/permisos`).subscribe({
             next: (res) => {
                 const permisos = res.data ?? [];
                 // ← guarda en caché por grupoId

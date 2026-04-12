@@ -20,6 +20,7 @@ import { AuthService } from '../../services/auth.service';
 import { PermissionsService } from '../../services/permissions.service';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { OnInit } from '../../../../node_modules/@angular/core/types/core';
+import { environment } from '../../../environments/environment';
 export interface Comentario { autor: string; texto: string; fecha: Date; }
 export interface Historial { accion: string; fecha: Date; usuario: string; }
 
@@ -94,7 +95,7 @@ export class GroupDetail implements OnInit, OnDestroy{
   }
 
   private cargarMiembros(grupoId: string): void {
-    this.http.get<any>(`http://localhost:3000/api/grupos/${grupoId}/miembros`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/grupos/${grupoId}/miembros`).subscribe({
         next: (res) => this.miembros = res.data,
         error: () => this.messageService.add({
             severity: 'error',
@@ -105,20 +106,20 @@ export class GroupDetail implements OnInit, OnDestroy{
   }
 
   private cargarEstados(): void {
-      this.http.get<any>('http://localhost:3000/api/tickets/estados').subscribe({
+      this.http.get<any>(`${environment.apiUrl}/api/tickets/estados`).subscribe({
           next: (res) => this.estados = res.data
       });
   }
 
   private cargarPrioridades(): void {
-      this.http.get<any>('http://localhost:3000/api/tickets/prioridades').subscribe({
+      this.http.get<any>(`${environment.apiUrl}/api/tickets/prioridades`).subscribe({
           next: (res) => this.prioridades = res.data
       });
 }
 
   private cargarTickets(grupoId: string): void { 
     this.cargandoTickets = true;
-    this.http.get<any>(`http://localhost:3000/api/tickets?grupoId=${grupoId}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/tickets?grupoId=${grupoId}`).subscribe({
         next: (res) => {
           this.tickets = res.data.map((t: any) => ({
             ...t,
@@ -143,7 +144,7 @@ export class GroupDetail implements OnInit, OnDestroy{
 
   private cargarGrupo(id: string): void {
     this.cargandoGrupo = true;
-    this.http.get(`http://localhost:3000/api/grupos/${id}`).subscribe({
+    this.http.get(`${environment.apiUrl}/api/grupos/${id}`).subscribe({
       next: (res: any) => {
         this.grupo = res.data[0];
         this.cargandoGrupo = false;
@@ -204,7 +205,7 @@ export class GroupDetail implements OnInit, OnDestroy{
     this.tickets = [...this.tickets];
     this.ticketArrastrado = null;
 
-    this.http.patch(`http://localhost:3000/api/tickets/${ticket.id}`, {
+    this.http.patch(`${environment.apiUrl}/api/tickets/${ticket.id}`, {
       estado: estadoDestino
     }).subscribe({
       error: () => {
@@ -256,7 +257,7 @@ export class GroupDetail implements OnInit, OnDestroy{
         return;
     }
       if (this.modoEdicion && this.ticketSeleccionado) {
-        this.http.put<any>(`http://localhost:3000/api/tickets/${this.ticketSeleccionado.id}`, {
+        this.http.put<any>(`${environment.apiUrl}/api/tickets/${this.ticketSeleccionado.id}`, {
             titulo:      this.form.value.titulo,
             descripcion: this.form.value.descripcion,
             asignadoId:  this.form.value.asignado,
@@ -291,7 +292,7 @@ export class GroupDetail implements OnInit, OnDestroy{
             }
         });
       } else {
-          this.http.post<any>('http://localhost:3000/api/tickets', {
+          this.http.post<any>(`${environment.apiUrl}/api/tickets`, {
               grupoId:     this.grupo.id,
               titulo:      this.form.value.titulo,
               descripcion: this.form.value.descripcion,
@@ -365,7 +366,7 @@ export class GroupDetail implements OnInit, OnDestroy{
   }
 
   private cargarComentarios(ticketId: string): void {
-    this.http.get<any>(`http://localhost:3000/api/tickets/${ticketId}/comentarios`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/tickets/${ticketId}/comentarios`).subscribe({
         next: (res) => {
             if (this.ticketSeleccionado) {
                 this.ticketSeleccionado.comentarios = res.data;
@@ -376,7 +377,7 @@ export class GroupDetail implements OnInit, OnDestroy{
 }
 
 private cargarHistorial(ticketId: string): void {
-    this.http.get<any>(`http://localhost:3000/api/tickets/${ticketId}/historial`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/tickets/${ticketId}/historial`).subscribe({
         next: (res) => {
             if (this.ticketSeleccionado) {
                 this.ticketSeleccionado.historial = res.data;
@@ -390,7 +391,7 @@ agregarComentario(inputEl: HTMLInputElement) {
     const texto = inputEl.value.trim();
     if (!texto || !this.ticketSeleccionado) return;
 
-    this.http.post<any>(`http://localhost:3000/api/tickets/${this.ticketSeleccionado.id}/comentarios`, { texto }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/tickets/${this.ticketSeleccionado.id}/comentarios`, { texto }).subscribe({
         next: (res) => {
             const nombreUsuario = this.authService.usuario()?.nombreCompleto ?? 'Usuario';
             this.ticketSeleccionado?.comentarios?.push({
@@ -422,7 +423,7 @@ agregarComentario(inputEl: HTMLInputElement) {
         acceptButtonProps: { severity: 'danger' },
         rejectButtonProps: { severity: 'secondary', text: true },
         accept: () => {
-            this.http.delete(`http://localhost:3000/api/tickets/${ticket.id}`).subscribe({
+            this.http.delete(`${environment.apiUrl}/api/tickets/${ticket.id}`).subscribe({
                 next: () => {
                     this.tickets = this.tickets.filter(t => t.id !== ticket.id);
                     this.messageService.add({ severity: 'success', summary: 'Eliminado', detail: 'Ticket eliminado correctamente.' });

@@ -12,7 +12,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { MessageService } from 'primeng/api';
-
+import { environment } from '../../../../environments/environment';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -146,7 +146,7 @@ export class Register implements OnInit {
     this.loading = true;
     const { confirmPassword, ...payload } = this.registerForm.getRawValue();
 
-    this.http.post('http://localhost:3000/api/auth/register', payload).subscribe({
+    this.http.post(`${environment.apiUrl}/api/auth/register`, payload).subscribe({
       next: () => {
         this.loading = false;
         this.messageService.add({

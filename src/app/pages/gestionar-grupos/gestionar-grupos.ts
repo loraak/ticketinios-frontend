@@ -21,6 +21,7 @@ import { PermissionsService } from '../../services/permissions.service';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { CheckboxModule } from 'primeng/checkbox';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment.prod';
 
 export interface UsuarioSistema {
     id: string;
@@ -95,7 +96,7 @@ export class GestionarGrupos implements OnInit {
 
     cargarGrupos() {
         this.loading = true;
-        this.http.get<any>('http://localhost:3000/api/grupos/admin').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/grupos/admin`).subscribe({
             next: (res) => {
                 this.grupos = res.data;
                 this.loading = false;
@@ -106,7 +107,7 @@ export class GestionarGrupos implements OnInit {
     }
 
     cargarUsuarios() {
-        this.http.get<any>('http://localhost:3000/api/usuarios').subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/usuarios`).subscribe({
             next: (res) => {
                 this.usuarios = res.data;
                 this.cdr.detectChanges(); // ← agrega esto
@@ -118,7 +119,7 @@ export class GestionarGrupos implements OnInit {
         this.grupoSeleccionado = grupo;
         this.usuariosSeleccionados = [];
 
-        this.http.get<any>(`http://localhost:3000/api/grupos/${grupo.id}/miembros`).subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/grupos/${grupo.id}/miembros`).subscribe({
             next: (res) => {
                 this.miembrosActuales = res.data;
                 this.usuariosSeleccionados = res.data.map((m: MiembroGrupo) => m.usuarioId);
@@ -138,13 +139,13 @@ export class GestionarGrupos implements OnInit {
         const peticiones = [
             ...agregar.map(id => {
                 const usuario = this.usuarios.find(u => u.id === id);
-                return this.http.post(`http://localhost:3000/api/grupos/${this.grupoSeleccionado!.id}/miembros`, {
+                return this.http.post(`${environment.apiUrl}/api/grupos/${this.grupoSeleccionado!.id}/miembros`, {
                     usuarioId: id,
                     nombreCompleto: usuario?.nombreCompleto
                 });
             }),
             ...quitar.map(id =>
-                this.http.delete(`http://localhost:3000/api/grupos/${this.grupoSeleccionado!.id}/miembros/${id}`)
+                this.http.delete(`${environment.apiUrl}/api/grupos/${this.grupoSeleccionado!.id}/miembros/${id}`)
             )
         ];
 
@@ -166,7 +167,7 @@ export class GestionarGrupos implements OnInit {
         this.grupoSeleccionado = grupo;
         this.miembroSeleccionado = miembro;
 
-        this.http.get<any>(`http://localhost:3000/api/grupos/${grupo.id}/permisos/${miembro.usuarioId}`).subscribe({
+        this.http.get<any>(`${environment.apiUrl}/api/grupos/${grupo.id}/permisos/${miembro.usuarioId}`).subscribe({
             next: (res) => {
                 this.permisosSeleccionados = res.data ?? [];
                 this.modalPermisosVisible = true;
@@ -179,7 +180,7 @@ export class GestionarGrupos implements OnInit {
         if (!this.grupoSeleccionado || !this.miembroSeleccionado) return;
 
         this.http.put(
-            `http://localhost:3000/api/grupos/${this.grupoSeleccionado.id}/permisos/${this.miembroSeleccionado.usuarioId}`,
+            `${environment.apiUrl}/api/grupos/${this.grupoSeleccionado.id}/permisos/${this.miembroSeleccionado.usuarioId}`,
             { permisos: this.permisosSeleccionados }
         ).subscribe({
             next: () => {
@@ -202,7 +203,7 @@ export class GestionarGrupos implements OnInit {
             acceptButtonProps: { severity: grupo.activo ? 'danger' : 'success' },
             rejectButtonProps: { severity: 'secondary', text: true },
             accept: () => {
-                this.http.patch(`http://localhost:3000/api/grupos/admin/estado/${grupo.id}`, {}).subscribe({
+                this.http.patch(`${environment.apiUrl}/api/grupos/admin/estado/${grupo.id}`, {}).subscribe({
                     next: () => {
                         this.grupos = this.grupos.map(g =>
                             g.id === grupo.id ? { ...g, activo: !g.activo } : g
