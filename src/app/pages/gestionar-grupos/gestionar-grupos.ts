@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+import { TextareaModule } from 'primeng/textarea';
 import { TableModule } from 'primeng/table';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -11,12 +11,11 @@ import { TagModule } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { PasswordModule } from 'primeng/password';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
-
+import { AuthService } from '../../services/auth.service';
 import { PermissionsService } from '../../services/permissions.service'; 
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -52,7 +51,7 @@ export interface MiembroGrupo {
         CommonModule, FormsModule, ReactiveFormsModule,
         TableModule, CardModule, ButtonModule, DialogModule,
         InputTextModule, TagModule, ToastModule, ConfirmDialogModule,
-        FloatLabelModule, MultiSelectModule, DividerModule,
+        FloatLabelModule, MultiSelectModule, DividerModule, TextareaModule,
         TooltipModule, HasPermissionDirective, CheckboxModule
     ],
     providers: [MessageService, ConfirmationService],
@@ -65,10 +64,24 @@ export class GestionarGrupos implements OnInit {
     private confirmationService = inject(ConfirmationService);
     private cdr              = inject(ChangeDetectorRef);
     protected permissionsSvc = inject(PermissionsService);
+    protected authService = inject(AuthService);
+
+    constructor(
+        private fb: FormBuilder,
+    ) {
+        this.form = this.fb.group({
+            nombre:      ['', Validators.required],
+            descripcion: ['', Validators.required]
+        });
+    }
+
 
     grupos:   GrupoAdmin[]    = [];
     usuarios: UsuarioSistema[] = [];
     loading = false;
+    modalVisible = false;
+    modoEdicion = false;
+    form: FormGroup;
 
     // Modal agregar miembro
     modalMiembrosVisible = false;
@@ -92,6 +105,71 @@ export class GestionarGrupos implements OnInit {
     ngOnInit() {
         this.cargarGrupos();
         this.cargarUsuarios();
+    }
+
+    abrirModalNuevo() {
+        this.modoEdicion = false;
+        this.form.reset();
+        this.modalVisible = true;
+    }
+
+    abrirModalEditar(grupo: GrupoAdmin) {
+        this.modoEdicion = true;
+        this.grupoSeleccionado = grupo;
+        this.form.patchValue(grupo);    
+        this.modalVisible = true;
+    }
+
+    guardar() {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+    
+        if (this.modoEdicion && this.grupoSeleccionado) {
+            this.http.put<any>(
+                `${environment.apiUrl}/api/grupos/admin/${this.grupoSeleccionado.id}`,
+                this.form.value
+            ).subscribe({
+                next: (res) => {
+                    const actualizado = res.data[0];
+                    this.grupos = this.grupos.map(g =>
+                        g.id === actualizado.id ? actualizado : g
+                    );
+                    this.permissionsSvc.refreshPermissionsForGroup(actualizado.id);
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo actualizado.' });
+                    this.modalVisible = false;
+                },
+                error: (err) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.data?.[0]?.message || 'Error inesperado.'
+                    });
+                }
+            });
+        } else {
+            this.http.post<any>(`${environment.apiUrl}/api/grupos`, {
+                ...this.form.value,
+                nombre:        this.form.value.nombre,
+                descripcion:   this.form.value.descripcion,
+                creadorNombre: this.authService.usuario()?.nombreCompleto
+            }).subscribe({
+                next: (res) => {
+                    this.grupos = [...this.grupos, res.data[0]];
+                    this.permissionsSvc.refreshPermissionsForGroup(res.data[0].id);
+                    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Grupo creado.' });
+                    this.modalVisible = false;
+                },
+                error: (err) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: err.error?.data?.[0]?.message || 'Error inesperado.'
+                    });
+                }
+            });
+        }
     }
 
     cargarGrupos() {

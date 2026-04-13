@@ -7,6 +7,7 @@
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--text-color);">
                 Gestión de Grupos
             </h2>
+            <p-button *ifHasPermission="['grupos:crear']" label="Nuevo Grupo" icon="pi pi-plus" (onClick)="abrirModalNuevo()"></p-button>
         </div>
     </ng-template>
 
@@ -42,6 +43,15 @@
                             *ifHasPermission="['gestionarGrupos:agregar_usuario']"
                             pTooltip="Gestionar miembros"
                             (onClick)="abrirModalMiembros(grupo)">
+                        </p-button>
+                        <p-button 
+                            *ifHasPermission="['gestionarGrupos:editar_grupo']"
+                            icon="pi pi-pencil"
+                            [rounded]="true"
+                            [text]="true"
+                            pTooltip="Editar grupo"
+                            (onClick)="abrirModalEditar(grupo)"
+                            [disabled]="!grupo.activo">
                         </p-button>
                         <p-button 
                             [icon]="grupo.activo ? 'pi pi-ban' : 'pi pi-check-circle'"
@@ -155,5 +165,37 @@
     <ng-template pTemplate="footer">
         <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="modalPermisosVisible = false"></p-button>
         <p-button label="Guardar permisos" (onClick)="guardarPermisos()"></p-button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="modalVisible"
+    [header]="modoEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
+    [modal]="true"
+    [style]="{ width: '480px' }"
+    [draggable]="false">
+
+    <form [formGroup]="form">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem 0 0.5rem;">
+            <p-floatlabel class="w-full mt-2">
+                <input id="nombre" type="text" pInputText formControlName="nombre" class="w-full">
+                <label for="nombre">Nombre</label>
+            </p-floatlabel>
+            <p-floatlabel class="w-full mt-2">
+                <textarea id="descripcion" pTextarea formControlName="descripcion"
+                    class="w-full" rows="3" style="resize: none;">
+                </textarea>
+                <label for="descripcion">Descripción</label>
+            </p-floatlabel>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" severity="secondary" [text]="true"
+            (onClick)="modalVisible = false">
+        </p-button>
+        <p-button [label]="modoEdicion ? 'Guardar' : 'Crear'"
+            (onClick)="guardar()">
+        </p-button>
     </ng-template>
 </p-dialog>
